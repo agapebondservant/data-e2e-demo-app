@@ -1,0 +1,32 @@
+server:
+  port: 8090
+
+spring:
+  datasource:
+    url: jdbc:h2:file:/Users/nn2/N/VMware-explore/db;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: password
+    driverClassName: org.h2.Driver
+  jpa:
+    spring.jpa.database-platform: org.hibernate.dialect.H2Dialect
+  h2:
+    console:
+      enabled: true
+  sql:
+    init:
+      mode: always
+
+rmq:
+  listeners:
+    queue:
+      fraud-transactions: mds-fraud-transactions
+    exchange: mds-fraud-transactions-exchange
+
+gemfire:
+  region: mds-region
+  url: http://localhost:7070/geode-mgmt/v1/management/commands
+
+fraud:
+  detection:
+    distance-threshold-in-kms: 10
+    time-threshold-in-seconds: 600

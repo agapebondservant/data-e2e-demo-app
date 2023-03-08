@@ -1,0 +1,70 @@
+<div class="row">
+  <div class="column">
+    <table>
+      <tr>
+        <td>
+          Select card number:
+        </td>
+        <td>
+          <select [(ngModel)]="selectedCard">
+            <option value="">Select an option</option>
+            <option *ngFor="let card of cards" [ngValue]="card">{{card.number}}</option>  
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Select date time:
+        </td>
+        <td>
+          <select [(ngModel)]="selectedDateTime">
+            <option value="">Select an option</option>
+            <option *ngFor="let dateTime of dateTimes" [ngValue]="dateTime">{{dateTime.name}}</option>  
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Enter amount:
+        </td>
+        <td>
+          <input type='field' [(ngModel)]="amount" />
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Select location:
+        </td>
+        <td>
+          <select [(ngModel)]="selectedLocation">
+            <option value="">Select an option</option>
+            <option *ngFor="let location of locations" [ngValue]="location">{{location.name}}</option>  
+          </select>
+        </td>
+      </tr>
+    </table>
+    
+    <button (click)='onSubmit()' style='margin-top: 10px;'>Submit</button>  
+  </div>
+  
+  <div class='column'>
+    <table border='1' cellspacing=0 cellpadding=5>
+      <tr>
+        <td>Card Number</td>
+        <td>Transaction Type</td>
+        <td>Amount</td>
+        <td>Location</td>
+        <td>Is Fraud ??</td>
+      </tr>
+      <ng-container *ngFor="let transaction of transactions">
+        <tr>
+          <td>{{transaction.cardNumber}}</td>
+          <td>{{transaction.transactionType}}</td>
+          <td>{{transaction.amount}}</td>
+          <td>{{transaction.location}}</td>
+          <td>{{transaction.isFraud ? 'Fraud Transaction' : 'No'}}</td>
+        </tr>
+      </ng-container>
+    </table>
+  </div>
+</div>
