@@ -36,8 +36,7 @@ public class FraudTransactionsListener {
                 default:
                     throw new IllegalArgumentException("Unknown transaction type: " + transaction.getTransactionType());
             }
-        } else {
-            return null;
         }
+        throw new IllegalArgumentException("Missing Transaction type");
     }
 }

@@ -1,7 +1,12 @@
-.row {
-  display: flex;
+::ng-deep .fraud {
+  color: red;
 }
 
-.column {
-  flex: 50%;
+::ng-deep .valid {
+  color: green;
+}
+
+.btn-align {
+  width: 100%;
+  justify-content: flex-end;
 }

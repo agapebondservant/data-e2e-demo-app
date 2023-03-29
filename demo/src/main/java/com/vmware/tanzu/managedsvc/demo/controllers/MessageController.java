@@ -3,6 +3,7 @@ package com.vmware.tanzu.managedsvc.demo.controllers;
 import com.vmware.tanzu.managedsvc.demo.model.Transaction;
 import com.vmware.tanzu.managedsvc.demo.publishers.TransactionPublisher;
 import com.vmware.tanzu.managedsvc.demo.service.TransactionProcessor;
+import com.vmware.tanzu.managedsvc.demo.service.impl.TransactionsManagement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MessageController {
     private final TransactionPublisher transactionPublisher;
     private final BeanFactory beanFactory;
+    private final TransactionsManagement transactionsManagement;
 
     @CrossOrigin(origins = "http://localhost:55625")
     @PostMapping
@@ -31,7 +33,7 @@ public class MessageController {
     @CrossOrigin(origins = "http://localhost:55625")
     @GetMapping
     public @ResponseBody ResponseEntity<?> getTransactions() {
-        TransactionProcessor transactionProcessor = beanFactory.getBean("CREDIT_CARD", TransactionProcessor.class);
-        return ResponseEntity.ok(transactionProcessor.getFraudTransactions());
+        // TransactionProcessor transactionProcessor = beanFactory.getBean("CREDIT_CARD", TransactionProcessor.class);
+        return ResponseEntity.ok(transactionsManagement.getFraudTransactions());
     }
 }
