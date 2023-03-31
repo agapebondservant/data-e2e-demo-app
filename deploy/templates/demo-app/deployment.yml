@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-app-dep
+  labels:
+    app: demo-app-dep
+  namespace: vmware-explore
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+     app: demo-app
+  template:
+    metadata:
+      labels:
+        app: demo-app
+    spec:
+      imagePullSecrets:
+        - name: docker-secret
+      initContainers:
+      - name: dir-creator
+        image: "bitnami/minideb:latest"
+        imagePullPolicy: Always
+        command:
+          - /bin/sh
+          - -cx
+          - |
+            chmod 777 /opt/vmware/demo/db
+            chown -R 1001:1001 /opt/vmware/demo/db
+        volumeMounts:
+          - name: volume
+            mountPath: /opt/vmware/demo/db
+      containers:
+      - name: demo-app
+        image: irisdev21/demo-app:2
+        ports:
+          - containerPort: 8090
+        volumeMounts:
+        - name: app-vol
+          mountPath: /opt/vmware/demo/db
+      volumes:
+      - name: app-vol
+        persistentVolumeClaim:
+            claimName: demo-app-pvc

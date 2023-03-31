@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gemfire-svc
+  labels:
+    app: gemfire-svc
+  namespace: vmware-explore
+spec:
+  ports:
+    - port: 7070
+      protocol: TCP
+      targetPort: 7070
+  type: ClusterIP
+  selector:
+    app: gemfire

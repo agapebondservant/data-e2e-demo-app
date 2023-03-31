@@ -31,8 +31,8 @@
           <div>No Live Transactions</div>
         </ng-template>
       </div>
-      <div class='clr-row'>
-        <canvasjs-chart [options]="chartOptions" [styles]="{height:'360px'}"></canvasjs-chart>    
+      <div class='clr-row' *ngIf='showGraph()'>
+        <canvasjs-chart [options]="chartOptions" [styles]="{height:'360px'}"></canvasjs-chart>
       </div>
     </div>
     <div class="clr-col-8">
@@ -40,6 +40,7 @@
         <clr-dg-action-bar>
           <div class="btn-group btn-align">
             <button type="button" class="btn btn-sm btn-primary" (click)="stop()">Stop</button>
+            <button type="button" class="btn btn-sm btn-secondary" (click)="delete()">Delete</button>
           </div>
         </clr-dg-action-bar>
         <clr-dg-placeholder>No Transactions Found</clr-dg-placeholder>

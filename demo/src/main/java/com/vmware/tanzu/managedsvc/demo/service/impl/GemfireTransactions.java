@@ -81,6 +81,19 @@ public class GemfireTransactions {
         }
     }
 
+    public void deleteAllTransactions() {
+        try {
+            String url = gemfireUrl + "?cmd= " + "remove --region=" + gemfireRegion + " --all=true";
+            log.info("Deleting data from {}", url);
+
+            RestTemplate restTemplate = new RestTemplate();
+            restTemplate.getForObject(url, String.class);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     @SneakyThrows
     private String toJsonArray(List<Transaction> list) {
         ObjectMapper mapper = new ObjectMapper();
