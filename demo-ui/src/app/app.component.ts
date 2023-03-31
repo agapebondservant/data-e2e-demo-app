@@ -27,7 +27,7 @@ export class AppComponent implements OnInit {
     this.startTransactions();
   }
 
-  api: string = 'http://localhost:8090/demo';
+  api: string = 'http://explore-demo.demoapp-vmw.com/demo';
   title = 'demo-ui';
 
   cards: Card[] = [
@@ -62,6 +62,18 @@ export class AppComponent implements OnInit {
 
   public stop() {
     clearInterval(this.interval);
+  }
+
+  public delete() {
+    this.httpClient
+      .delete(this.api)
+      .subscribe(res => {
+        setTimeout(() => this.getTransactions(this.api), 2000);
+      });
+  }
+
+  public showGraph(): boolean {
+    return this.transactions.filter(transaction => transaction.isFraud).length > 0;
   }
 
   public getTransactionStatus(transaction: Transaction) {

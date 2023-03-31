@@ -17,4 +17,8 @@ public class TransactionsManagement {
     public List<TransactionEntity> getFraudTransactions() {
         return (List<TransactionEntity>) transactionRepository.findAll();
     }
+
+    public void deleteTransactions() {
+        transactionRepository.deleteAll();
+    }
 }

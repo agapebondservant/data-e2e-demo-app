@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-ui-dep
+  labels:
+    app: demo-ui-dep
+  namespace: vmware-explore
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+     app: demo-ui
+  template:
+    metadata:
+      labels:
+        app: demo-ui
+    spec:
+      imagePullSecrets:
+        - name: docker-secret
+      containers:
+      - name: demo-ui
+        image: irisdev21/demo-ui:init
+        ports:
+          - containerPort: 8080
