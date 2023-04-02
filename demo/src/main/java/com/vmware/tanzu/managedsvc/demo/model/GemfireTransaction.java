@@ -2,6 +2,7 @@ package com.vmware.tanzu.managedsvc.demo.model;
 
 import com.vmware.tanzu.managedsvc.demo.enums.TransactionType;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,24 +11,13 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Transaction {
+@Builder
+public class GemfireTransaction {
     private String dateTime;
 
     private TransactionType transactionType;
 
     private String cardNumber;
 
-    private String amount;
-
     private String location;
-
-    private double lat;
-
-    private double lon;
-
-    private String rmqMsgArriveTime;
-
-    private String msgProcessStartTime;
-
-    private String msgProcessCompletionTime;
 }

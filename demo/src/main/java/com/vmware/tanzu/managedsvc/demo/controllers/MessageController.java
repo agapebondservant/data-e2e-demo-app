@@ -1,6 +1,6 @@
 package com.vmware.tanzu.managedsvc.demo.controllers;
 
-import com.vmware.tanzu.managedsvc.demo.model.Transaction;
+import com.vmware.tanzu.managedsvc.demo.model.RmqTransaction;
 import com.vmware.tanzu.managedsvc.demo.publishers.TransactionPublisher;
 import com.vmware.tanzu.managedsvc.demo.service.impl.GemfireTransactions;
 import com.vmware.tanzu.managedsvc.demo.service.impl.TransactionsManagement;
@@ -25,7 +25,7 @@ public class MessageController {
     private final GemfireTransactions gemfireTransactions;
 
     @PostMapping
-    public @ResponseBody ResponseEntity<?> send(@RequestBody Transaction transaction) {
+    public @ResponseBody ResponseEntity<?> send(@RequestBody RmqTransaction transaction) {
         transactionPublisher.send(transaction);
         return ResponseEntity.ok().build();
     }

@@ -1,3 +1,13 @@
+export interface RmqTransaction {
+  dateTime: string | null;
+  transactionType: CardType;
+  cardNumber: string;
+  amount: string;
+  location: string;
+  lat: number;
+  lon: number;
+}
+
 export interface Transaction {
   dateTime: string | undefined;
   transactionType: CardType;
@@ -7,6 +17,9 @@ export interface Transaction {
   lat: number;
   lon: number;
   isFraud?: boolean;
+  rmqMsgArriveTime?: string;
+  msgProcessStartTime?: string;
+  msgProcessCompletionTime?: string;
 }
 
 export interface Card {

@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Transaction {
+public class RmqTransaction {
     private String dateTime;
 
     private TransactionType transactionType;
@@ -24,10 +24,4 @@ public class Transaction {
     private double lat;
 
     private double lon;
-
-    private String rmqMsgArriveTime;
-
-    private String msgProcessStartTime;
-
-    private String msgProcessCompletionTime;
 }

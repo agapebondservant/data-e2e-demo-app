@@ -50,4 +50,13 @@ public class TransactionEntity {
 
     @Column
     private Boolean isFraud;
+
+    @Column
+    private String rmqMsgArriveTime;
+
+    @Column
+    private String msgProcessStartTime;
+
+    @Column
+    private String msgProcessCompletionTime;
 }
