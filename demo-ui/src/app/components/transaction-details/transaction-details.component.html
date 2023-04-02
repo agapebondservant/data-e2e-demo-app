@@ -1,0 +1,24 @@
+<clr-modal [(clrModalOpen)]="showDetails" [clrModalClosable]="false" [clrModalSize]="'md'">
+  <label class="modal-title">Transaction Details</label>
+  <div class="modal-body center-align">
+    <div *ngIf='data'>
+      <table>
+        <tr>
+          <td>Rmq Message Arrival Time: </td>
+          <td>{{getDateTime(data?.rmqMsgArriveTime)}}</td>
+        </tr>
+        <tr>
+          <td>Message Processing Start Time: </td>
+          <td>{{getDateTime(data?.msgProcessStartTime)}}</td>
+        </tr>
+        <tr>
+          <td>Message Processing End Time: </td>
+          <td>{{getDateTime(data?.msgProcessCompletionTime)}}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" (click)="closeModal()">Close</button>
+  </div>
+</clr-modal>

@@ -2,7 +2,7 @@ package com.vmware.tanzu.managedsvc.demo.service.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vmware.tanzu.managedsvc.demo.model.Transaction;
+import com.vmware.tanzu.managedsvc.demo.model.GemfireTransaction;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,8 +27,8 @@ public class GemfireTransactions {
     @Value("${gemfire.region}")
     public String gemfireRegion;
 
-    public List<Transaction> getTransactions(String key) {
-        List<Transaction> list = new ArrayList<>();
+    public List<GemfireTransaction> getTransactions(String key) {
+        List<GemfireTransaction> list = new ArrayList<>();
         try {
             String url = gemfireUrl + "?cmd=get --key=" + key + " --region=" + gemfireRegion;
             log.info("Fetching data from {}", url);
@@ -44,7 +44,7 @@ public class GemfireTransactions {
                 if (!value.asText().equals("null")) {
                     String data = URLDecoder.decode(value.asText(), StandardCharsets.UTF_8.toString());
                     data = data.substring(1, data.length() - 1);
-                    Transaction[] transactions = mapper.readValue(data, Transaction[].class);
+                    GemfireTransaction[] transactions = mapper.readValue(data, GemfireTransaction[].class);
                     if (transactions != null) {
                         list = new LinkedList<>(Arrays.asList(transactions));
                     }
@@ -60,7 +60,7 @@ public class GemfireTransactions {
         return list;
     }
 
-    public void addTransaction(Transaction transaction, List<Transaction> existingTransactions) {
+    public void addTransaction(GemfireTransaction transaction, List<GemfireTransaction> existingTransactions) {
         if (existingTransactions == null) {
             existingTransactions = new ArrayList<>();
         }
@@ -95,7 +95,7 @@ public class GemfireTransactions {
     }
 
     @SneakyThrows
-    private String toJsonArray(List<Transaction> list) {
+    private String toJsonArray(List<GemfireTransaction> list) {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.writeValueAsString(list);
     }

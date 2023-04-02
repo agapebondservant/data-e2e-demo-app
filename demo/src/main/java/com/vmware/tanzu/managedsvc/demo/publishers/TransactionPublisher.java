@@ -1,6 +1,6 @@
 package com.vmware.tanzu.managedsvc.demo.publishers;
 
-import com.vmware.tanzu.managedsvc.demo.model.Transaction;
+import com.vmware.tanzu.managedsvc.demo.model.RmqTransaction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,7 +14,7 @@ public class TransactionPublisher {
     @Value("${rmq.listeners.queue.fraud-transactions}")
     private String queue;
 
-    public void send(Transaction transaction) {
+    public void send(RmqTransaction transaction) {
         rabbitTemplate.convertAndSend(this.queue, transaction);
     }
 }

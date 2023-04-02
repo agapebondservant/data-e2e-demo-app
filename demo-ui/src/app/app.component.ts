@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { Card, CardType, Location, Transaction } from 'src/app/app.model';
+import { Card, CardType, Location, RmqTransaction, Transaction } from 'src/app/app.model';
 import { HttpClient } from '@angular/common/http';
 import '@cds/core/icon/register.js';
-import { alarmClockIcon, ClarityIcons, creditCardIcon, userIcon, vmBugIcon } from '@cds/core/icon';
+import { alarmClockIcon, ClarityIcons, creditCardIcon, infoCircleIcon, userIcon, vmBugIcon } from '@cds/core/icon';
+import { environment } from 'src/environments/environment';
+import { DatePipe } from '@angular/common';
 
 interface FraudTransaction {
   name: string;
@@ -20,14 +22,14 @@ export class AppComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    ClarityIcons.addIcons(vmBugIcon, userIcon, alarmClockIcon, creditCardIcon);
+    ClarityIcons.addIcons(vmBugIcon, userIcon, alarmClockIcon, creditCardIcon, infoCircleIcon);
 
     this.getTransactions(this.api);
     this.drawChart();
     this.startTransactions();
   }
 
-  api: string = 'http://explore-demo.demoapp-vmw.com/demo';
+  api: string = environment.API_ENDPOINT + '/demo';
   title = 'demo-ui';
 
   cards: Card[] = [
@@ -59,6 +61,8 @@ export class AppComponent implements OnInit {
   interval: any;
   onGoingTransaction: boolean = false;
   chartOptions: any;
+  showDetails: boolean = false;
+  fraudTransaction: Transaction | undefined;
 
   public stop() {
     clearInterval(this.interval);
@@ -83,6 +87,11 @@ export class AppComponent implements OnInit {
     return "<span class='valid'>Valid Transaction</span>";
   }
 
+  public showTransactionDetails(fraudTransaction: Transaction) {
+    this.showDetails = true;
+    this.fraudTransaction = fraudTransaction;
+  }
+
   private startTransactions() {
     setTimeout(() => this.pickRandomTransaction(), 2000);
     this.interval = setInterval(() => this.pickRandomTransaction(), 5000);
@@ -93,9 +102,9 @@ export class AppComponent implements OnInit {
     const randomLocation = this.locations[Math.floor(Math.random() * this.locations.length)];
 
     const now = new Date();
-    const formattedDate = now.toISOString().slice(0, 19);
+    const formattedDate = new DatePipe('en-US').transform(now, 'dd-MM-yyyyTHH:mm:ssZ');
 
-    const transaction: Transaction = {
+    const transaction: RmqTransaction = {
       dateTime: formattedDate,
       transactionType: randomCard.type,
       cardNumber: randomCard.number,
@@ -114,7 +123,13 @@ export class AppComponent implements OnInit {
     this.save(this.api, transaction);
   }
 
-  private save(apiEndpoint: string, data: any): void {
+  public getDateTime(dateTime: any) {
+    const date = new Date(dateTime);
+    const formattedDate = new DatePipe('en-US').transform(date, 'dd/MM/yyyy h:mm:ss.SSS a');
+    return formattedDate;
+  }
+
+  private save(apiEndpoint: string, data: RmqTransaction): void {
     this.httpClient
       .post(apiEndpoint, data)
       .subscribe(res => {
@@ -166,7 +181,8 @@ export class AppComponent implements OnInit {
     }
   }
 
-  private randomIntFromInterval(min: number, max: number): string { // min and max included 
+  // This method is used for getting random amount for transaction; min and max included 
+  private randomIntFromInterval(min: number, max: number): string {
     return Math.floor(Math.random() * (max - min + 1) + min).toString()
   }
 }

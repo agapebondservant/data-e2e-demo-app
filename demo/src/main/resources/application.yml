@@ -3,8 +3,8 @@ server:
 
 spring:
   datasource:
-    # url: jdbc:h2:file:/Users/nn2/N/VMware-explore/db;DB_CLOSE_ON_EXIT=FALSE
-    url: jdbc:h2:file:/opt/vmware/demo/db;DB_CLOSE_ON_EXIT=TRUE
+    url: jdbc:h2:file:/Users/nn2/N/VMware-explore/db;DB_CLOSE_ON_EXIT=FALSE
+    # url: jdbc:h2:file:/opt/vmware/demo/db;DB_CLOSE_ON_EXIT=TRUE
     username: sa
     password: password
     driverClassName: org.h2.Driver
@@ -25,8 +25,8 @@ rmq:
 
 gemfire:
   region: mds-region
-  # url: http://localhost:7070/geode-mgmt/v1/management/commands
-  url: http://gemfire-svc:7070/geode-mgmt/v1/management/commands
+  url: http://localhost:7070/geode-mgmt/v1/management/commands
+  # url: http://gemfire-svc:7070/geode-mgmt/v1/management/commands
 
 fraud:
   detection:

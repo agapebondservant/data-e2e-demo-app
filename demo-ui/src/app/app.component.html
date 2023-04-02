@@ -53,7 +53,7 @@
   
         <clr-dg-row *clrDgItems="let transaction of transactions" [clrDgItem]="transaction">
           <clr-dg-cell>
-            <span>{{transaction.dateTime ? transaction.dateTime.replace('T', ' ') : ''}}</span>
+            <span>{{getDateTime(transaction.dateTime)}}</span>
           </clr-dg-cell>
           <clr-dg-cell>
             <span>{{transaction.cardNumber}}</span>
@@ -77,6 +77,7 @@
               <cds-icon shape="success-standard"></cds-icon>
             </ng-template>
             <span [innerHTML]="getTransactionStatus(transaction)"></span>
+            &nbsp;<a *ngIf="transaction.isFraud" (click)='showTransactionDetails(transaction)'><cds-icon shape='info-circle'></cds-icon></a>
           </clr-dg-cell>
         </clr-dg-row>
         <clr-dg-footer>
@@ -90,3 +91,5 @@
     </div>
   </div>
 </div>
+
+<app-transaction-details [showDetails]='showDetails' [data]='fraudTransaction' (close)='showDetails=false'></app-transaction-details>

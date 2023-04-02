@@ -1,11 +1,17 @@
 package com.vmware.tanzu.managedsvc.demo.utils;
 
+import com.vmware.tanzu.managedsvc.demo.constants.AppConstants;
 import com.vmware.tanzu.managedsvc.demo.entity.TransactionEntity;
+import com.vmware.tanzu.managedsvc.demo.model.GemfireTransaction;
+import com.vmware.tanzu.managedsvc.demo.model.RmqTransaction;
 import com.vmware.tanzu.managedsvc.demo.model.Transaction;
 
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.util.TimeZone;
 
 public class Utility {
     // helper method to calculate distance between two locations
@@ -36,14 +42,40 @@ public class Utility {
         return Math.abs(duration.getSeconds());
     }
 
-    public static TransactionEntity toDto(Transaction transaction) {
-        return TransactionEntity.builder().amount(transaction.getAmount())
+    public static TransactionEntity toDtoFromGemfire(GemfireTransaction transaction) {
+        return TransactionEntity.builder()
                 .cardNumber(transaction.getCardNumber())
                 .transactionType(transaction.getTransactionType())
                 .dateTime(transaction.getDateTime())
-                .lat(transaction.getLat())
-                .lon(transaction.getLon())
                 .location(transaction.getLocation())
                 .build();
+    }
+
+    public static TransactionEntity toDtoFromRmq(RmqTransaction transaction) {
+        return TransactionEntity.builder()
+                .cardNumber(transaction.getCardNumber())
+                .location(transaction.getLocation())
+                .dateTime(transaction.getDateTime())
+                .lat(transaction.getLat())
+                .lon(transaction.getLon())
+                .amount(transaction.getAmount())
+                .transactionType(transaction.getTransactionType())
+                .build();
+    }
+
+    public static GemfireTransaction toGemfireDtoFromRmq(RmqTransaction transaction) {
+        return GemfireTransaction.builder()
+                .cardNumber(transaction.getCardNumber())
+                .location(transaction.getLocation())
+                .dateTime(transaction.getDateTime())
+                .transactionType(transaction.getTransactionType())
+                .build();
+    }
+
+    public static String getCurrentDateTime() {
+        Date now = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat(AppConstants.pattern);
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return dateFormat.format(now);
     }
 }

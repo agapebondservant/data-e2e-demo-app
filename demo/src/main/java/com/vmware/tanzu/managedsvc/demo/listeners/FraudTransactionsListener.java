@@ -1,9 +1,10 @@
 package com.vmware.tanzu.managedsvc.demo.listeners;
 
-import com.vmware.tanzu.managedsvc.demo.model.Transaction;
+import com.vmware.tanzu.managedsvc.demo.model.RmqTransaction;
 import com.vmware.tanzu.managedsvc.demo.service.TransactionProcessor;
 import com.vmware.tanzu.managedsvc.demo.service.impl.CreditCardTransaction;
 import com.vmware.tanzu.managedsvc.demo.service.impl.DebitCardTransaction;
+import com.vmware.tanzu.managedsvc.demo.utils.Utility;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -19,14 +20,17 @@ public class FraudTransactionsListener {
     private final DebitCardTransaction debitCardTransaction;
 
     @RabbitListener(queues = "${rmq.listeners.queue.fraud-transactions}")
-    public void transactionListener(@Payload Transaction transaction) {
+    public void transactionListener(@Payload RmqTransaction transaction) {
+        String rmqMsgArrivalTime = Utility.getCurrentDateTime();
+        transaction.setDateTime(rmqMsgArrivalTime);
+
         TransactionProcessor transactionProcessor = getTransactionProcessor(transaction);
         if (transactionProcessor != null) {
             transactionProcessor.validateTransaction(transaction);
         }
     }
 
-    private TransactionProcessor getTransactionProcessor(Transaction transaction) {
+    private TransactionProcessor getTransactionProcessor(RmqTransaction transaction) {
         if (transaction.getTransactionType() != null) {
             switch (transaction.getTransactionType()) {
                 case CREDIT_CARD:
