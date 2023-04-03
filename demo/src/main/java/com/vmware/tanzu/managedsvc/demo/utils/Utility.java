@@ -29,9 +29,9 @@ public class Utility {
         return R * c;
     }
 
-    public static long differenceInSeconds(String dateTimeString1, String dateTimeString2, String pattern) {
+    public static long differenceInSeconds(String dateTimeString1, String dateTimeString2) {
         // Parse the date-time strings using the specified pattern
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(AppConstants.pattern);
         LocalDateTime dateTime1 = LocalDateTime.parse(dateTimeString1, formatter);
         LocalDateTime dateTime2 = LocalDateTime.parse(dateTimeString2, formatter);
 

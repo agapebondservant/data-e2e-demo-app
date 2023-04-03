@@ -77,7 +77,7 @@ public class CreditCardTransaction implements TransactionProcessor {
                 continue;
             }
             if (Utility.distance(transaction.getLat(), transaction.getLon(), newTransaction.getLat(), newTransaction.getLon()) > kms
-                    && Utility.differenceInSeconds(transaction.getDateTime(), newTransaction.getDateTime(), AppConstants.pattern) < seconds) {
+                    && Utility.differenceInSeconds(transaction.getDateTime(), newTransaction.getDateTime()) < seconds) {
                 // location within given kms, possible fraud
                 return true;
             }

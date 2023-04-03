@@ -27,4 +27,10 @@ export class TransactionDetailsComponent {
     return formattedDate;
   }
 
+  public totalTimeTaken(date1String: any, date2String: any) {
+    const date1 = new Date(date1String);
+    const date2 = new Date(date2String);
+    const diffInSeconds = date2.getTime() - date1.getTime();
+    return diffInSeconds;
+  }
 }

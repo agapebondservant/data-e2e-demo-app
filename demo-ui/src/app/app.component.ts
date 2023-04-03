@@ -33,14 +33,14 @@ export class AppComponent implements OnInit {
   title = 'demo-ui';
 
   cards: Card[] = [
-    { id: 1, number: '0000-1111-2222', type: CardType.CREDIT_CARD },
-    { id: 2, number: '3333-4444-5555', type: CardType.CREDIT_CARD },
-    { id: 3, number: '6666-7777-8888', type: CardType.DEBIT_CARD },
-    { id: 4, number: '9999-9000-8000', type: CardType.CREDIT_CARD },
-    { id: 5, number: '1234-1234-1234', type: CardType.DEBIT_CARD },
-    { id: 6, number: '9876-5432-1098', type: CardType.CREDIT_CARD },
-    { id: 7, number: '2580-9183-6121', type: CardType.DEBIT_CARD },
-    { id: 8, number: '4321-1234-9876', type: CardType.CREDIT_CARD }
+    { id: 1, number: '0020-1111-2222', type: CardType.CREDIT_CARD },
+    { id: 2, number: '3333-4424-5555', type: CardType.CREDIT_CARD },
+    { id: 3, number: '6662-7777-8888', type: CardType.DEBIT_CARD },
+    { id: 4, number: '9999-9000-8010', type: CardType.CREDIT_CARD },
+    { id: 5, number: '1232-1234-1234', type: CardType.DEBIT_CARD },
+    { id: 6, number: '9876-5432-1198', type: CardType.CREDIT_CARD },
+    { id: 7, number: '2581-9183-6121', type: CardType.DEBIT_CARD },
+    { id: 8, number: '4322-1234-9876', type: CardType.CREDIT_CARD }
   ];
   locations: Location[] = [
     { id: 1, name: 'Bangalore', lat: 12.9716, lon: 77.5946 },

@@ -25,19 +25,32 @@ spec:
           - /bin/sh
           - -cx
           - |
-            chmod 777 /opt/vmware/demo/db
-            chown -R 1001:1001 /opt/vmware/demo/db
+            chmod 777 /opt/vmware/demo-explore/db
+            chown -R 1001:1001 /opt/vmware/demo-explore/db
         volumeMounts:
           - name: volume
-            mountPath: /opt/vmware/demo/db
+            mountPath: /opt/vmware/demo-explore/db
       containers:
       - name: demo-app
         image: irisdev21/demo-app:2
         ports:
           - containerPort: 8090
+        env:
+          - name: spring.datasource.url
+            value: jdbc:h2:file:/opt/vmware/demo/db;DB_CLOSE_ON_EXIT=TRUE
+          - name: spring.rabbitmq.host
+            value: operator-cluster.staging-managed-ds.cloud.vmware.com
+          - name: spring.rabbitmq.ssl.enabled
+            value: "true"
+          - name: spring.rabbitmq.password
+            value: vmware
+          - name: spring.rabbitmq.username
+            value: vmware
+          - name: gemfire.url
+            value: http://3.16.36.82:7070/geode-mgmt/v1/management/commands
         volumeMounts:
         - name: app-vol
-          mountPath: /opt/vmware/demo/db
+          mountPath: /opt/vmware/demo-explore/db
       volumes:
       - name: app-vol
         persistentVolumeClaim:
