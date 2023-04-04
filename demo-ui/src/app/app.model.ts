@@ -35,11 +35,6 @@ export interface Location {
   lon: number;
 }
 
-export interface DateTime {
-  name: string;
-  value: string;
-}
-
 export enum CardType {
   CREDIT_CARD = "CREDIT_CARD",
   DEBIT_CARD = "DEBIT_CARD"
