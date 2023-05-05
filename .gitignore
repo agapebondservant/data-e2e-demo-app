@@ -1,0 +1,12 @@
+.env
+tmp.json
+values.yaml
+/deploy/templates/demo-ui/deployment.yml
+/deploy/templates/demo-data/rabbitmq-operator-packagerepository.yaml
+./deploy/templates/demo-data/rabbitmq-operator-packagerepository.yaml
+./deploy/templates/demo-ui/deployment.yml
+*.log
+./deploy/templates/demo-app/deployment.yml
+mds-locator
+test.log
+test.yaml

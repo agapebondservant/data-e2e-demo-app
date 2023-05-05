@@ -25,32 +25,34 @@ spec:
           - /bin/sh
           - -cx
           - |
-            chmod 777 /opt/vmware/demo-explore/db
-            chown -R 1001:1001 /opt/vmware/demo-explore/db
+            mkdir -p /opt/data
+            touch /opt/data/db
+            chmod 777 /opt/data/db
+            chown -R 1001:1001 /opt/data
         volumeMounts:
-          - name: volume
-            mountPath: /opt/vmware/demo-explore/db
+          - name: app-vol
+            mountPath: /opt/data
       containers:
       - name: demo-app
-        image: irisdev21/demo-app:2
+        image: oawofolu/demo-app-anomaly #irisdev21/demo-app:2
         ports:
           - containerPort: 8090
         env:
           - name: spring.datasource.url
-            value: jdbc:h2:file:/opt/vmware/demo/db;DB_CLOSE_ON_EXIT=TRUE
+            value: jdbc:h2:file:./opt/data/db;DB_CLOSE_ON_EXIT=TRUE
           - name: spring.rabbitmq.host
-            value: operator-cluster.staging-managed-ds.cloud.vmware.com
+            value: rmqanomaly.anomaly-ns.svc.cluster.local # operator-cluster.staging-managed-ds.cloud.vmware.com
           - name: spring.rabbitmq.ssl.enabled
-            value: "true"
+            value: "false"
           - name: spring.rabbitmq.password
             value: vmware
           - name: spring.rabbitmq.username
             value: vmware
           - name: gemfire.url
-            value: http://3.16.36.82:7070/geode-mgmt/v1/management/commands
+            value: http://gfanomaly-locator.tanzudatatap.com/geode-mgmt/v1/management/commands
         volumeMounts:
         - name: app-vol
-          mountPath: /opt/vmware/demo-explore/db
+          mountPath: /opt/data
       volumes:
       - name: app-vol
         persistentVolumeClaim:

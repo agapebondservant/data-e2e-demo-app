@@ -124,7 +124,7 @@ export class AppComponent implements OnInit {
   }
 
   public getDateTime(dateTime: any) {
-    const date = new Date(dateTime);
+    const date = new Date(dateTime.replace('T', ' ').replace('Z', ''));
     const formattedDate = new DatePipe('en-US').transform(date, 'dd/MM/yyyy h:mm:ss.SSS a');
     return formattedDate;
   }
@@ -181,7 +181,7 @@ export class AppComponent implements OnInit {
     }
   }
 
-  // This method is used for getting random amount for transaction; min and max included 
+  // This method is used for getting random amount for transaction; min and max included
   private randomIntFromInterval(min: number, max: number): string {
     return Math.floor(Math.random() * (max - min + 1) + min).toString()
   }

@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -16,9 +17,9 @@ spec:
         app: demo-ui
     spec:
       imagePullSecrets:
-        - name: docker-secret
+        - name: image-pull-secret
       containers:
       - name: demo-ui
-        image: irisdev21/demo-ui:init
+        image: oawofolu/demo-ui-anomaly #irisdev21/demo-ui:init
         ports:
           - containerPort: 8080

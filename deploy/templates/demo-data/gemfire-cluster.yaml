@@ -1,0 +1,86 @@
+#@ load("@ytt:data", "data")
+---
+apiVersion: gemfire.vmware.com/v1
+kind: GemFireCluster
+metadata:
+  name: gfanomaly
+spec:
+  image: registry.tanzu.vmware.com/pivotal-gemfire/vmware-gemfire:10.0.0
+  security:
+    tls: { }
+  serialization:
+    pdx:
+      readSerialized: true
+  locators:
+    overrides:
+      jvmOptions:
+        - "-Djava.net.preferIPv4Stack=true"
+  servers:
+    overrides:
+      jvmOptions:
+        - "-Djava.net.preferIPv4Stack=true"
+      gemFireProperties:
+        - name: "start-dev-rest-api"
+          value: "true"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gfanomaly-dev-api
+spec:
+  selector:
+    gemfire.vmware.com/app: gfanomaly-server
+  ports:
+    - name: rest-api
+      port: 7070
+      targetPort: 7070
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gfanomaly-mgmt-api
+spec:
+  selector:
+    gemfire.vmware.com/app: gfanomaly-locator
+  ports:
+    - name: management
+      port: 7070
+      targetPort: 7070
+
+---
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: gfanomaly-dev-api-httpproxy
+spec:
+  routes:
+    - conditions:
+        - prefix: /
+      services:
+        - name: gfanomaly-dev-api
+          port: 7070
+      loadBalancerPolicy:
+        strategy: Cookie
+  virtualhost:
+    fqdn: #@ 'gfanomaly-server.' + data.values.fqdn_domain
+
+---
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: gfanomaly-mgmt-api-httpproxy
+spec:
+  routes:
+    - conditions:
+        - prefix: /
+      services:
+        - name: gfanomaly-mgmt-api
+          port: 7070
+      loadBalancerPolicy:
+        strategy: Cookie
+  virtualhost:
+    fqdn: #@ 'gfanomaly-locator.' + data.values.fqdn_domain
+
+
