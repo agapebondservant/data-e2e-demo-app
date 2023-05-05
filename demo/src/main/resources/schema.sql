@@ -1,4 +1,4 @@
-DROP TABLE Transaction;
+DROP TABLE IF EXISTS Transaction;
 
 CREATE TABLE Transaction (
   id INT AUTO_INCREMENT PRIMARY KEY,

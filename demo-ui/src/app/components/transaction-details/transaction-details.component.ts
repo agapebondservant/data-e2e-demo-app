@@ -22,7 +22,7 @@ export class TransactionDetailsComponent {
   }
 
   public getDateTime(dateTime: any) {
-    const date = new Date(dateTime);
+    const date = new Date(dateTime.replace('T', ' ').replace('Z', ''));
     const formattedDate = new DatePipe('en-US').transform(date, 'dd/MM/yyyy h:mm:ss.SSS a');
     return formattedDate;
   }

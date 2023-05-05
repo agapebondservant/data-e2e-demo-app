@@ -4,7 +4,6 @@ metadata:
   name: demo-app-pvc
   namespace: vmware-explore
 spec:
-  storageClassName: gp2
   accessModes:
     - ReadWriteOnce
   resources:
