@@ -34,6 +34,10 @@
       <div class='clr-row' *ngIf='showGraph()'>
         <canvasjs-chart [options]="chartOptions" [styles]="{height:'360px'}"></canvasjs-chart>
       </div>
+      <!--<div class='clr-row' *ngIf='showGraph()'>
+        <div leaflet [leafletOptions]="llOptions" [leafletLayers]="llLayers">
+        </div>
+      </div>-->
     </div>
     <div class="clr-col-8">
       <clr-datagrid>
@@ -50,7 +54,7 @@
         <clr-dg-column>Amount</clr-dg-column>
         <clr-dg-column>Location</clr-dg-column>
         <clr-dg-column>Info</clr-dg-column>
-  
+
         <clr-dg-row *clrDgItems="let transaction of transactions" [clrDgItem]="transaction">
           <clr-dg-cell>
             <span>{{getDateTime(transaction.dateTime)}}</span>

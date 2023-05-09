@@ -10,3 +10,8 @@ values.yaml
 mds-locator
 test.log
 test.yaml
+testing
+.idea/
+node_modules/
+package-lock.json
+package.json
