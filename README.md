@@ -1,9 +1,11 @@
-# VMWARE DATA DEMO APP
+# VMWARE DATA DEMO APP - Installing on TKG/TAP
 
-1. [Installing on Kubernetes](#kubernetes)
+1. [Pre-requisites for installing on Kubernetes](#kubernetes)
 2. [Set up Gemfire and RabbitMQ](#gemfire-and-rabbit)
 3. [Set up frontend and backend apps](#frontend-backend-apps)
-4. [Alternative: Installing on Workstation](#workstation)
+4. [TODO: Installing on TAP](#tap)
+5. [TODO: Integrating ML/MLOps](#mlops)
+6. [Alternative: Installing on Workstation](#workstation)
 
 <div style="color: #ceddee;">
 <hr/>
