@@ -27,6 +27,7 @@ export class AppComponent implements OnInit {
   ngOnInit() {
     ClarityIcons.addIcons(vmBugIcon, userIcon, alarmClockIcon, creditCardIcon, infoCircleIcon);
 
+    this.generateCities();
     this.getTransactions(this.api);
     this.drawChart();
     this.startTransactions();
@@ -34,11 +35,6 @@ export class AppComponent implements OnInit {
 
   api: string = environment.API_ENDPOINT + '/demo';
   title = 'demo-ui';
-  randIndexes: number[] = Array.from({length: 50}, () => Math.floor(Math.random() * 50));
-  usCities: any[] = cities.filter(city => city.country == 'US');
-  filteredCities: Location[] = this.randIndexes.map(i => this.usCities[i]).map((loc,i) => {
-    return { id: i+1, name: loc.name, lat: +loc.lat, lon: +loc.lng };
-  })
 
   cards: Card[] = [
     { id: 1, number: '0020-1111-2222', type: CardType.CREDIT_CARD },
@@ -63,6 +59,7 @@ export class AppComponent implements OnInit {
   fraudTransaction: Transaction | undefined;
   llOptions: any;
   llLayers: any[] = [];
+  filteredCities: Location[] = [];
 
   public stop() {
     clearInterval(this.interval);
@@ -199,5 +196,14 @@ export class AppComponent implements OnInit {
   // This method is used for getting random amount for transaction; min and max included
   private randomIntFromInterval(min: number, max: number): string {
     return Math.floor(Math.random() * (max - min + 1) + min).toString()
+  }
+
+  // This method is used for generating a random set of cities
+  private generateCities() {
+    const randIndexes: number[] = Array.from({length: 50}, () => Math.floor(Math.random() * 50));
+    const usCities: any[] = cities.filter(city => city.country == 'US');
+    this.filteredCities = randIndexes.map(i => usCities[i]).map((loc,i) => {
+      return { id: i+1, name: loc.name, lat: +loc.lat, lon: +loc.lng };
+    })
   }
 }
