@@ -1,13 +1,19 @@
 # VMWARE DATA DEMO APP
 
-## Credits
+1. [Credits](#credits)
+2. [Installing on Kubernetes](#kubernetes)
+3. [Set up Gemfire and RabbitMQ](#gemfire-and-rabbit)
+4. [Set up frontend and backend apps](#frontend-backend-apps)
+5. [Alternative: Installing on Workstation](#workstation)
+
+## Credits <a name=credits>
 <div class="alert alert-primary" role="alert">
 This was forked from the <b>Anomaly Detection demo</b> presented at <a href="https://vmware-explore-in.cventevents.com/event/1afa043a-2293-433d-9d63-85ff52ba8584/websitePage:f980d165-31f2-4d39-af64-2dfc5826a836" target="_blank">VMExplore India 2023</a>,
 and leverages the source code from their hard work.<br/>
 To learn more, please see the original git repository <a href="https://gitlab.eng.vmware.com/oawofolu/vmware-explore-demo-app" target="_blank">here</a>.
 </div>
 
-## Installing on Kubernetes
+## Installing on Kubernetes <a name=kubernetes>
 1. Make sure you set up the following pre-requisites:
 - [ ] Kubernetes 1.23+
 - [ ] Maven (supported version)
@@ -28,11 +34,6 @@ for orig in `find . -name "*.in.*" -type f`; do
   grep -qxF $target .gitignore || echo $target >> .gitignore
 done
 ```
-
-## Contents
-1. [Set up Gemfire and RabbitMQ](#gemfire-and-rabbit)
-2. [Set up frontend and backend apps](#frontend-backend-apps)
-3. [Alternative: Installing on Workstation](#workstation)
 
 ### Set up Gemfire and RabbitMQ <a name=gemfire-and-rabbit>
 1. Create target namespace for backing services:
