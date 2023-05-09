@@ -34,9 +34,9 @@ export class AppComponent implements OnInit {
 
   api: string = environment.API_ENDPOINT + '/demo';
   title = 'demo-ui';
-  randIndexes = Array.from({length: 50}, () => Math.floor(Math.random() * 50));
-  usCities = cities.filter(city => city.country == 'US');
-  filteredCities: Location[] = randIndexes.map(i => usCities[i]).map((loc,i) => {
+  randIndexes: number[] = Array.from({length: 50}, () => Math.floor(Math.random() * 50));
+  usCities: any[] = cities.filter(city => city.country == 'US');
+  filteredCities: Location[] = this.randIndexes.map(i => this.usCities[i]).map((loc,i) => {
     return { id: i+1, name: loc.name, lat: +loc.lat, lon: +loc.lng };
   })
 
