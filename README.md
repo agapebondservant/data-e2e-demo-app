@@ -8,11 +8,11 @@
 
 ## Credits <a name=credits>
 <div style="color: #ceddee;">
-
+<br/><br/>
 This was forked from the <b>Anomaly Detection demo</b> originally presented at <a href="https://vmware-explore-in.cventevents.com/event/1afa043a-2293-433d-9d63-85ff52ba8584/websitePage:f980d165-31f2-4d39-af64-2dfc5826a836" target="_blank">VMExplore India 2023</a>,
 and leverages the source code from their hard work.<br/>
 To learn more, please see the original git repository <a href="https://gitlab.eng.vmware.com/oawofolu/vmware-explore-demo-app" target="_blank">here</a>.
-
+<br/><br/>
 </div>
 
 ## Installing on Kubernetes <a name=kubernetes>
