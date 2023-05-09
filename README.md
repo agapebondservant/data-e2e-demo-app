@@ -92,9 +92,9 @@ watch kubectl get all -n $DEMO_NS
 ```
 
 11. Access endpoints:
-  * For Gemfire Pulse endpoint: gfanomaly-locator.<YOUR-FQDN-DOMAIN>/pulse (default credentials: admin/admin)
-  * For Gemfire REST API: gfanomaly-server.<YOUR-FQDN-DOMAIN>/gemfire-api/v1
-  * For RabbitMQ Management endpoint: rmqanomaly.<YOUR-FQDN-DOMAIN>
+  * For Gemfire Pulse endpoint: gfanomaly-locator.YOUR-FQDN-DOMAIN/pulse (default credentials: admin/admin)
+  * For Gemfire REST API: gfanomaly-server.YOUR-FQDN-DOMAIN/gemfire-api/v1
+  * For RabbitMQ Management endpoint: rmqanomaly.YOUR-FQDN-DOMAIN
   * Get login credentials for RabbitMQ Management console:
 ```
 kubectl get secret rmqanomaly-default-user -o jsonpath="{.data.default_user\.conf}" -n $DEMO_NS | base64 --decode
@@ -151,7 +151,7 @@ kubectl exec -it $(kubectl get pod -oname -l app=demo-ui -n vmware-explore) -n v
 ```
 
 7. Access endpoints:
-  * For UI: demo-ui.<YOUR-FQDN-DOMAIN>
+  * For UI: demo-ui.YOUR-FQDN-DOMAIN
 
   * To delete the frontend and backend apps:
 ```
