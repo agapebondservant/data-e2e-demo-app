@@ -16,7 +16,7 @@ To learn more, please see the original git repository <a href="https://gitlab.en
 <hr/>
 </div>
 
-## Installing on Kubernetes <a name=kubernetes>
+## Pre-requisites for installing on Kubernetes <a name=kubernetes>
 1. Make sure you set up the following pre-requisites:
 - [ ] Kubernetes 1.23+
 - [ ] Maven (supported version)
