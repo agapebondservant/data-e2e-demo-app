@@ -34,8 +34,9 @@ export class AppComponent implements OnInit {
 
   api: string = environment.API_ENDPOINT + '/demo';
   title = 'demo-ui';
-
-  filteredCities: Location[] = cities.filter(city => city.country == 'US').slice(0,50).map((loc,i) => {
+  randIndexes = Array.from({length: 50}, () => Math.floor(Math.random() * 50));
+  usCities = cities.filter(city => city.country == 'US');
+  filteredCities: Location[] = randIndexes.map(i => usCities[i]).map((loc,i) => {
     return { id: i+1, name: loc.name, lat: +loc.lat, lon: +loc.lng };
   })
 
@@ -48,16 +49,6 @@ export class AppComponent implements OnInit {
     { id: 6, number: '9876-5432-1198', type: CardType.CREDIT_CARD },
     { id: 7, number: '2581-9183-6121', type: CardType.DEBIT_CARD },
     { id: 8, number: '4322-1234-9876', type: CardType.CREDIT_CARD }
-  ];
-  locations: Location[] = [
-    { id: 1, name: 'Bangalore', lat: 12.9716, lon: 77.5946 },
-    { id: 2, name: 'Delhi', lat: 28.7041, lon: 77.1025 },
-    { id: 3, name: 'Mumbai', lat: 19.0759, lon: 72.8766 },
-    { id: 4, name: 'Hyderabad', lat: 17.3850, lon: 78.4867 },
-    { id: 5, name: 'Chennai', lat: 13.0826, lon: 80.2707 },
-    { id: 6, name: 'Kolkata', lat: 22.5626, lon: 88.3630 },
-    { id: 7, name: 'Ahmedabad', lat: 23.0314, lon: 72.5713 },
-    { id: 8, name: 'Pune', lat: 18.5204, lon: 73.8567 }
   ];
 
   transactions: Transaction[] = [];
@@ -108,7 +99,6 @@ export class AppComponent implements OnInit {
 
   private pickRandomTransaction() {
     const randomCard = this.cards[Math.floor(Math.random() * this.cards.length)];
-    //const randomLocation = this.locations[Math.floor(Math.random() * this.locations.length)];
     const randomLocation = this.filteredCities[Math.floor(Math.random() * this.filteredCities.length)];
 
     const now = new Date();
