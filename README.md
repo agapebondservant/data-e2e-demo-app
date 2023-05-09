@@ -1,4 +1,10 @@
-# vmware-explore-demo-app
+#VMWARE DATA DEMO APP
+
+## Credits
+<div class="alert alert-primary" role="alert">
+This was based on the <b>Anomaly Detection demo</b> presented at <a href="https://vmware-explore-in.cventevents.com/event/1afa043a-2293-433d-9d63-85ff52ba8584/websitePage:f980d165-31f2-4d39-af64-2dfc5826a836" target="_blank">VMExplore India 2023</a>.<br/>
+The original git repository is located <a href="https://gitlab.eng.vmware.com/oawofolu/vmware-explore-demo-app" target="_blank">here</a>.
+</div>
 
 ## Installing on Kubernetes
 1. Make sure you set up the following pre-requisites:

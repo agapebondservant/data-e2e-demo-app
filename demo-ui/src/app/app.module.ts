@@ -5,10 +5,11 @@ import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { ClarityModule } from '@clr/angular';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 
 import * as CanvasJSAngularChart from 'src/assets/canvasjs.angular.component';
 var CanvasJSChart = CanvasJSAngularChart.CanvasJSChart;
-	
+
 import { AppComponent } from './app.component';
 import { TransactionDetailsComponent } from './components/transaction-details/transaction-details.component';
 
@@ -23,7 +24,8 @@ import { TransactionDetailsComponent } from './components/transaction-details/tr
     FormsModule,
     HttpClientModule,
     ClarityModule,
-    BrowserAnimationsModule
+    BrowserAnimationsModule,
+    LeafletModule
   ],
   providers: [DatePipe],
   bootstrap: [AppComponent]

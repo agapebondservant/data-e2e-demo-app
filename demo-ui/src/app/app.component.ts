@@ -5,6 +5,9 @@ import '@cds/core/icon/register.js';
 import { alarmClockIcon, ClarityIcons, creditCardIcon, infoCircleIcon, userIcon, vmBugIcon } from '@cds/core/icon';
 import { environment } from 'src/environments/environment';
 import { DatePipe } from '@angular/common';
+import cities from 'cities.json';
+import { LeafletModule } from '@asymmetrik/ngx-leaflet';
+import * as L from 'leaflet';
 
 interface FraudTransaction {
   name: string;
@@ -31,6 +34,10 @@ export class AppComponent implements OnInit {
 
   api: string = environment.API_ENDPOINT + '/demo';
   title = 'demo-ui';
+
+  filteredCities: Location[] = cities.filter(city => city.country == 'US').slice(0,50).map((loc,i) => {
+    return { id: i+1, name: loc.name, lat: +loc.lat, lon: +loc.lng };
+  })
 
   cards: Card[] = [
     { id: 1, number: '0020-1111-2222', type: CardType.CREDIT_CARD },
@@ -63,6 +70,8 @@ export class AppComponent implements OnInit {
   chartOptions: any;
   showDetails: boolean = false;
   fraudTransaction: Transaction | undefined;
+  llOptions: any;
+  llLayers: any[] = [];
 
   public stop() {
     clearInterval(this.interval);
@@ -99,7 +108,8 @@ export class AppComponent implements OnInit {
 
   private pickRandomTransaction() {
     const randomCard = this.cards[Math.floor(Math.random() * this.cards.length)];
-    const randomLocation = this.locations[Math.floor(Math.random() * this.locations.length)];
+    //const randomLocation = this.locations[Math.floor(Math.random() * this.locations.length)];
+    const randomLocation = this.filteredCities[Math.floor(Math.random() * this.filteredCities.length)];
 
     const now = new Date();
     const formattedDate = new DatePipe('en-US').transform(now, 'dd-MM-yyyyTHH:mm:ssZ');
@@ -119,6 +129,10 @@ export class AppComponent implements OnInit {
     this.currentAmount = transaction.amount;
     this.currentTransactionType = transaction.transactionType;
     this.currentLocation = transaction.location;
+
+    var m = L.marker([randomLocation.lat, randomLocation.lon]);
+    m.bindPopup("<b>" + randomLocation.name + "</b>").openPopup();
+    this.llLayers.push(m);
 
     this.save(this.api, transaction);
   }
@@ -168,7 +182,7 @@ export class AppComponent implements OnInit {
     this.chartOptions = {
       animationEnabled: true,
       title: {
-        text: "Fraud Transactions"
+        text: "Fraudulent Transactions"
       },
       subtitles: [{
         text: "Transactions/location"
@@ -178,6 +192,17 @@ export class AppComponent implements OnInit {
         indexLabel: "{name}: {y}",
         dataPoints: data
       }]
+    }
+
+    this.llOptions = {
+      layers: [
+    		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    		  maxZoom: 19,
+    		  attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    		 })
+    	],
+    	zoom: 4,
+    	center: [37.7128, -80.006]
     }
   }
 
