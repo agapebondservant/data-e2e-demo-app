@@ -1,14 +1,13 @@
 # VMWARE DATA DEMO APP
 
-1. [Credits](#credits)
-2. [Installing on Kubernetes](#kubernetes)
-3. [Set up Gemfire and RabbitMQ](#gemfire-and-rabbit)
-4. [Set up frontend and backend apps](#frontend-backend-apps)
-5. [Alternative: Installing on Workstation](#workstation)
+1. [Installing on Kubernetes](#kubernetes)
+2. [Set up Gemfire and RabbitMQ](#gemfire-and-rabbit)
+3. [Set up frontend and backend apps](#frontend-backend-apps)
+4. [Alternative: Installing on Workstation](#workstation)
 
-## Credits <a name=credits>
 <div style="color: #ceddee;">
 <hr/>
+<b>NOTE</b><br/>
 This was forked from the <b>Anomaly Detection demo</b> originally presented at <a href="https://vmware-explore-in.cventevents.com/event/1afa043a-2293-433d-9d63-85ff52ba8584/websitePage:f980d165-31f2-4d39-af64-2dfc5826a836" target="_blank">VMExplore India 2023</a>,
 and leverages the source code from their hard work.<br/>
 To learn more, please see the original git repository <a href="https://gitlab.eng.vmware.com/oawofolu/vmware-explore-demo-app" target="_blank">here</a>.
