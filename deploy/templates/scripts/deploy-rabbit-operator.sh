@@ -4,11 +4,11 @@ echo "Deleting any pre-existing RabbitMQ install..."
 kubectl delete all --all -nrabbitmq-system || true
 kapp delete -a tanzu-rabbitmq-repo -y -nrabbitmq-system || true
 kapp delete -a tanzu-rabbitmq -y -nrabbitmq-system || true
-export RABBIT_KAPP_INST=$(kubectl get bindings.rabbitmq.com -ojson | jq '.metadata.labels["kapp.k14s.io/app"]' | tr -d '"')
+export RABBIT_KAPP_INST=$(kubectl get customresourcedefinition/standbyreplications.rabbitmq.tanzu.vmware.com -ojson | jq '.metadata.labels["kapp.k14s.io/app"]' | tr -d '"')
 kubectl get validatingwebhookconfiguration -l kapp.k14s.io/app=$RABBIT_KAPP_INST -o name | xargs -r kubectl delete
 kubectl get clusterrolebinding -l kapp.k14s.io/app=$RABBIT_KAPP_INST -o name | xargs -r kubectl delete
 kubectl get clusterrole -l kapp.k14s.io/app=$RABBIT_KAPP_INST -o name | xargs -r kubectl delete
-for n in $(kubectl get crd -o name | grep 'rabbitmq.com'); do
+for n in $(kubectl get crd -o name | grep 'rabbitmq.tanzu\|rabbitmq.com'); do
   kubectl get $n -o name | xargs -r kubectl delete
 done
 # kubectl delete ns rabbitmq-system
