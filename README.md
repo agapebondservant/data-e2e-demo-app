@@ -21,12 +21,9 @@ To learn more, please see the original git repository <a href="https://gitlab.en
 - [ ] Kubernetes 1.23+
 - [ ] Maven (supported version)
 - [ ] Project Contour
-- [ ] Environment file (.env)
-* Must create .env file (should be located at project root)
-* Use .env-sample as a guide
-- [ ] Values.yaml files
-* Must create deploy/templates/demo-ui/values.yaml and deploy/templates/demo-data/values.yaml
-* Use values-template.yaml as a guide
+- [ ] Environment file (.env - should be located at project root; use .env-sample as a guide)
+- [ ] values.yaml files (must create `deploy/templates/demo-ui/values.yaml` and `deploy/templates/demo-data/values.yaml`; use values-template.yaml as a guide)
+- [ ] psql client
 
 2. Prepare manifest files:
 ```
@@ -158,6 +155,14 @@ kubectl exec -it $(kubectl get pod -oname -l app=demo-ui -n vmware-explore) -n v
 ytt -f deploy/templates/demo-ui/ | kubectl delete -f -
 kubectl delete -f deploy/templates/demo-app/
 kubectl delete ns vmware-explore
+```
+
+### Integrating ML/MLOps <a name=mlops>
+1. Load training data into Greenplum:
+```
+export DATA_E2E_ML_TRAINING_DB_PASSWORD=<enter password>
+export PSQL_CONNECT_STR=postgresql://${DATA_E2E_ML_TRAINING_DB_USERNAME}:${DATA_E2E_ML_TRAINING_DB_PASSWORD}@${DATA_E2E_ML_TRAINING_DB_HOST}:${DATA_E2E_ML_TRAINING_DB_PORT}/${DATA_E2E_ML_TRAINING_DB_DATABASE}?sslmode=require
+psql ${PSQL_CONNECT_STR} -f demo-ml/resources/load_credit_card_dataset.sql
 ```
 
 ## Alternative: Installing on local workstation <a name=workstation>
