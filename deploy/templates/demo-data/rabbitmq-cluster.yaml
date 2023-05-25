@@ -5,6 +5,11 @@ kind: RabbitmqCluster
 metadata:
   name: rmqanomaly
 spec:
+  rabbitmq:
+    additionalPlugins:
+      - rabbitmq_management
+      - rabbitmq_prometheus
+      - rabbitmq_peer_discovery_k8s
   service:
     type: LoadBalancer
 

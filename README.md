@@ -2,10 +2,11 @@
 
 1. [Pre-requisites for installing on Kubernetes](#kubernetes)
 2. [Set up Gemfire and RabbitMQ](#gemfire-and-rabbit)
-3. [Set up frontend and backend apps](#frontend-backend-apps)
-4. [TODO: Installing on TAP](#tap)
-5. [TODO: Integrating ML/MLOps](#mlops)
-6. [Alternative: Installing on Workstation](#workstation)
+3. [Set up ETL](#etl)
+4. [Set up frontend and backend apps](#frontend-backend-apps)
+5. [TODO: Installing on TAP](#tap)
+6. [TODO: Integrating ML/MLOps](#mlops)
+7. [Alternative: Installing on Workstation](#workstation)
 
 <div style="color: #ceddee;">
 <hr/>
@@ -24,6 +25,7 @@ To learn more, please see the original git repository <a href="https://gitlab.en
 - [ ] Environment file (.env - should be located at project root; use .env-sample as a guide)
 - [ ] values.yaml files (must create `deploy/templates/demo-ui/values.yaml` and `deploy/templates/demo-data/values.yaml`; use values-template.yaml as a guide)
 - [ ] psql client
+- [ ] Spring Cloud Data Flow
 
 2. Prepare manifest files:
 ```
@@ -65,7 +67,7 @@ watch kubectl get all -n $DEMO_NS
 
 6. Create Gemfire region:
 ```
-kubectl exec -it gfanomaly-server-0 -n $DEMO_NS -- gfsh -e "connect --locator=gfanomaly-locator-0.gfanomaly-locator.anomaly-ns.svc.cluster.local[10334]" -e "create region --name=mds-region --type=REPLICATE --enable-statistics --entry-idle-time-expiration=300"
+kubectl exec -it gfanomaly-server-0 -n $DEMO_NS -- gfsh -e "connect --locator=gfanomaly-locator-0.gfanomaly-locator.anomaly-ns.svc.cluster.local[10334]" -e "create region --name=mds-region --type=REPLICATE --enable-statistics --entry-idle-time-expiration=300" -e "create region --name=mds-region-greenplum --type=REPLICATE --enable-statistics --entry-idle-time-expiration=300"
 ```
 
 7. Deploy RabbitMQ operator (if it has not already been installed):
@@ -100,6 +102,7 @@ kubectl get secret rmqanomaly-default-user -o jsonpath="{.data.default_user\.con
 * To delete the Gemfire and RabbitMQ clusters:
 ```
 kubectl delete all --all -n $DEMO_NS
+kubectl delete pvc --all -n $DEMO_NS
 kubectl delete ns $DEMO_NS
 ```
 
@@ -157,6 +160,25 @@ kubectl delete -f deploy/templates/demo-app/
 kubectl delete ns vmware-explore
 ```
 
+### Set up ETL <a name=etl>
+1. Install Spring Cloud Data Flow:
+```
+deploy/templates/scripts/setup-scdf-1.3.sh
+```
+
+2. Register additional starter apps: (see Spring Cloud Data Flow docs)
+   
+sink.gemfire=docker:springcloudstream/gemfire-sink-rabbit:2.1.6.RELEASE
+source.gemfire=docker:springcloudstream/gemfire-source-rabbit:2.1.6.RELEASE
+source.gemfire-cq=docker:springcloudstream/gemfire-cq-source-rabbit:2.1.6.RELEASE
+source.trigger=https://repo.spring.io/artifactory/release/org/springframework/cloud/stream/app/trigger-source-rabbit/2.1.4.RELEASE/trigger-source-rabbit-2.1.4.RELEASE.jar
+
+3. Set up Greenplum password:
+```
+export DATA_E2E_ML_TRAINING_DB_PASSWORD=<enter password>
+```
+4. Set up Greenplum-Gemfire pipeline by copying the output of the following
+`echo greenplum-training=jdbc --spring.datasource.url=\"jdbc:postgresql://${DATA_E2E_ML_TRAINING_DB_HOST}:5432/${DATA_E2E_ML_TRAINING_DB_DATABASE}\" --spring.datasource.username=\"gpadmin\" --spring.datasource.password=\"${DATA_E2E_ML_TRAINING_DB_PASSWORD}\" --jdbc.supplier.query=\"select row_to_json\(randomforest\) from \(select id, time_elapsed, amt, lat, long, is_fraud from public.rf_credit_card_transactions_inference limit 1000\) randomforest\" \| gemfire --gemfire.pool.host-addresses=\"gfanomaly-locator-0.gfanomaly-locator.anomaly-ns.svc.cluster.local:10334\" --gemfire.region.regionName=\"mds-region-greenplum\" --gemfire.sink.json=\"true\" --gemfire.sink.keyExpression=\"1\"`
 ### Integrating ML/MLOps <a name=mlops>
 1. Load training data into Greenplum:
 ```
