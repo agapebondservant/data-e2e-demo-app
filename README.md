@@ -67,7 +67,7 @@ watch kubectl get all -n $DEMO_NS
 
 6. Create Gemfire region:
 ```
-kubectl exec -it gfanomaly-server-0 -n $DEMO_NS -- gfsh -e "connect --locator=gfanomaly-locator-0.gfanomaly-locator.anomaly-ns.svc.cluster.local[10334]" -e "create region --name=mds-region --type=REPLICATE --enable-statistics --entry-idle-time-expiration=300" -e "create region --name=mds-region-greenplum --type=REPLICATE --enable-statistics --entry-idle-time-expiration=300"
+kubectl exec -it gfanomaly-server-0 -n $DEMO_NS -- gfsh -e "connect --locator=gfanomaly-locator-0.gfanomaly-locator.anomaly-ns.svc.cluster.local[10334]" -e "create region --name=mds-region --type=PARTITION --enable-statistics --entry-idle-time-expiration=300" -e "create region --name=mds-region-greenplum --type=PARTITION --enable-statistics --entry-idle-time-expiration=300" -e "create region --name=mds-region-greenplum-offset --type=PARTITION --enable-statistics --entry-idle-time-expiration=300"
 ```
 
 7. Deploy RabbitMQ operator (if it has not already been installed):
@@ -177,14 +177,30 @@ source.trigger=https://repo.spring.io/artifactory/release/org/springframework/cl
 ```
 export DATA_E2E_ML_TRAINING_DB_PASSWORD=<enter password>
 ```
-4. Set up Greenplum-Gemfire pipeline by copying the output of the following
-`echo greenplum-training=jdbc --spring.datasource.url=\"jdbc:postgresql://${DATA_E2E_ML_TRAINING_DB_HOST}:5432/${DATA_E2E_ML_TRAINING_DB_DATABASE}\" --spring.datasource.username=\"gpadmin\" --spring.datasource.password=\"${DATA_E2E_ML_TRAINING_DB_PASSWORD}\" --jdbc.supplier.query=\"select row_to_json\(randomforest\) from \(select id, time_elapsed, amt, lat, long, is_fraud from public.rf_credit_card_transactions_inference limit 1000\) randomforest\" \| gemfire --gemfire.pool.host-addresses=\"gfanomaly-locator-0.gfanomaly-locator.anomaly-ns.svc.cluster.local:10334\" --gemfire.region.regionName=\"mds-region-greenplum\" --gemfire.sink.json=\"true\" --gemfire.sink.keyExpression=\"1\"`
+
+4. Deploy Madlib training function in Greenplum (if not already deployed - one-time op):
+```
+export DATA_E2E_ML_TRAINING_DB_PASSWORD=<enter password>
+export PSQL_CONNECT_STR=postgresql://${DATA_E2E_ML_TRAINING_DB_USERNAME}:${DATA_E2E_ML_TRAINING_DB_PASSWORD}@${DATA_E2E_ML_TRAINING_DB_HOST}:${DATA_E2E_ML_TRAINING_DB_PORT}/${DATA_E2E_ML_TRAINING_DB_DATABASE}?sslmode=require
+psql ${PSQL_CONNECT_STR} -f demo-ml/resources/random_forest_madlib.sql
+```
+
+5. Set up Greenplum-Gemfire pipeline by copying the output of the following:
+```
+echo greenplum-inference=jdbc --spring.datasource.url=\"jdbc:postgresql://${DATA_E2E_ML_TRAINING_DB_HOST}:5432/${DATA_E2E_ML_TRAINING_DB_DATABASE}\" --spring.datasource.username=\"gpadmin\" --spring.datasource.password=\"${DATA_E2E_ML_TRAINING_DB_PASSWORD}\" --jdbc.supplier.query=\"select row_to_json\(randomforest\) from \(select * from public.run_random_forest_training\(\) limit 1000\) randomforest\" \| gemfire --gemfire.pool.host-addresses=\"gfanomaly-locator-0.gfanomaly-locator.anomaly-ns.svc.cluster.local:10334\" --gemfire.region.regionName=\"mds-region-greenplum\" --gemfire.sink.json=\"true\" --gemfire.sink.keyExpression=\"T\(java.lang.Math\).random\(\) * 10000.0\"
+```
+
 ### Integrating ML/MLOps <a name=mlops>
 1. Load training data into Greenplum:
 ```
 export DATA_E2E_ML_TRAINING_DB_PASSWORD=<enter password>
 export PSQL_CONNECT_STR=postgresql://${DATA_E2E_ML_TRAINING_DB_USERNAME}:${DATA_E2E_ML_TRAINING_DB_PASSWORD}@${DATA_E2E_ML_TRAINING_DB_HOST}:${DATA_E2E_ML_TRAINING_DB_PORT}/${DATA_E2E_ML_TRAINING_DB_DATABASE}?sslmode=require
 psql ${PSQL_CONNECT_STR} -f demo-ml/resources/load_credit_card_dataset.sql
+```
+
+2. Create custom MLModel which uses Gemfire data as its feature store:
+```
+MLFLOW_TRACKING_URI=${MLFLOW_TRACKING_URI} python demo-ml/resources/random_forest_madlib.py
 ```
 
 ## Alternative: Installing on local workstation <a name=workstation>
