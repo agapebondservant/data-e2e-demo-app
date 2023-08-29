@@ -1,4 +1,4 @@
-DROP FUNCTION run_random_forest_training()
+DROP FUNCTION run_random_forest_training();
 
 CREATE OR REPLACE FUNCTION public.run_random_forest_training()
 RETURNS table (
@@ -21,7 +21,7 @@ BEGIN
 		rf_credit_card_transactions_inference_results,
 		rf_credit_card_transactions_importances;
 
-	create TABLE rf_credit_card_transactions_training(
+	CREATE TABLE rf_credit_card_transactions_training(
 		id serial,
 		time_elapsed bigint,
 		amt real,
@@ -47,20 +47,7 @@ BEGIN
 	      t.lat,
 	      t.long,
 	      t.is_fraud
-	from (
-	  select index,
-	  		time_elapsed,
-	      	amt,
-	      	lat,
-	      	long,
-	      	is_fraud,
-	        row_number() over () as rn,
-	        (select count(*) from credit_card_transactions)  as cnt
-	  from credit_card_transactions
-	  group by index, time_elapsed, amt, lat, long, is_fraud
-	) t
-	where rn  <= 200000 --0.75*cnt
-	order by rn;
+	from credit_card_transactions_training_vw t;
 
 	-- 3. ingest data into inference table
 	insert into rf_credit_card_transactions_inference (id, time_elapsed, amt, lat, long, is_fraud)
@@ -70,20 +57,7 @@ BEGIN
 	      t.lat,
 	      t.long,
 	      t.is_fraud
-	from (
-	  select index,
-	  		time_elapsed,
-	      	amt,
-	      	lat,
-	      	long,
-	      	is_fraud,
-	        row_number() over () as rn,
-	        (select count(*) from credit_card_transactions)  as cnt
-	  from credit_card_transactions
-	  group by index, time_elapsed, amt, lat, long, is_fraud
-	) t
-	where rn  > 200000 and rn <=400000 -- 0.75*cnt
-	order by rn;
+	from credit_card_transactions_inference_vw t;
 
 	-- 4. generate RandomForest model
 	perform madlib.forest_train('rf_credit_card_transactions_training',         -- source table

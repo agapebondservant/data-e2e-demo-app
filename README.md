@@ -65,7 +65,7 @@ deploy/templates/scripts/deploy-gemfire-cluster.sh $DEMO_NS
 watch kubectl get all -n $DEMO_NS
 ```
 
-6. Create Gemfire region:
+6. Create Gemfire regions:
 ```
 kubectl exec -it gfanomaly-server-0 -n $DEMO_NS -- gfsh -e "connect --locator=gfanomaly-locator-0.gfanomaly-locator.anomaly-ns.svc.cluster.local[10334]" -e "create region --name=mds-region --type=PARTITION --enable-statistics --entry-idle-time-expiration=300" -e "create region --name=mds-region-greenplum --type=PARTITION --enable-statistics --entry-idle-time-expiration=300" -e "create region --name=mds-region-greenplum-offset --type=PARTITION --enable-statistics --entry-idle-time-expiration=300"
 ```
@@ -187,7 +187,7 @@ psql ${PSQL_CONNECT_STR} -f demo-ml/resources/random_forest_madlib.sql
 
 5. Set up Greenplum-Gemfire pipeline by copying the output of the following:
 ```
-echo greenplum-inference=jdbc --spring.datasource.url=\"jdbc:postgresql://${DATA_E2E_ML_TRAINING_DB_HOST}:5432/${DATA_E2E_ML_TRAINING_DB_DATABASE}\" --spring.datasource.username=\"gpadmin\" --spring.datasource.password=\"${DATA_E2E_ML_TRAINING_DB_PASSWORD}\" --jdbc.supplier.query=\"select row_to_json\(randomforest\) from \(select * from public.run_random_forest_training\(\) limit 1000\) randomforest\" \| gemfire --gemfire.pool.host-addresses=\"gfanomaly-locator-0.gfanomaly-locator.anomaly-ns.svc.cluster.local:10334\" --gemfire.region.regionName=\"mds-region-greenplum\" --gemfire.sink.json=\"true\" --gemfire.sink.keyExpression=\"T\(java.lang.Math\).random\(\) * 10000.0\"
+echo greenplum-inference=jdbc --spring.datasource.url=\"jdbc:postgresql://${DATA_E2E_ML_TRAINING_DB_HOST}:5432/${DATA_E2E_ML_TRAINING_DB_DATABASE}\" --spring.datasource.username=\"gpadmin\" --spring.datasource.password=\"${DATA_E2E_ML_TRAINING_DB_PASSWORD}\" --spring.cloud.stream.poller.cron=\"0 0 0 \* \* \*\" --jdbc.supplier.query=\"select row_to_json\(randomforest\) from \(select id, time_passed, amount, latitude, longitude, is_fraud_flag, training_run_timestamp from public.run_random_forest_training\(\) limit 1000 \) randomforest\" \| transform --spel.function.expression=\"#jsonPath\(payload, \'$.row_to_json.value\'\)\"  \| gemfire --gemfire.pool.host-addresses=\"gfanomaly-locator-0.gfanomaly-locator.anomaly-ns.svc.cluster.local:10334\" --gemfire.region.regionName=\"mds-region-greenplum\" --gemfire.sink.json=\"true\" --gemfire.sink.keyExpression=\"payload.getField\(\'id\'\)\"
 ```
 
 ### Integrating ML/MLOps <a name=mlops>
@@ -196,11 +196,33 @@ echo greenplum-inference=jdbc --spring.datasource.url=\"jdbc:postgresql://${DATA
 export DATA_E2E_ML_TRAINING_DB_PASSWORD=<enter password>
 export PSQL_CONNECT_STR=postgresql://${DATA_E2E_ML_TRAINING_DB_USERNAME}:${DATA_E2E_ML_TRAINING_DB_PASSWORD}@${DATA_E2E_ML_TRAINING_DB_HOST}:${DATA_E2E_ML_TRAINING_DB_PORT}/${DATA_E2E_ML_TRAINING_DB_DATABASE}?sslmode=require
 psql ${PSQL_CONNECT_STR} -f demo-ml/resources/load_credit_card_dataset.sql
+psql ${PSQL_CONNECT_STR} -f demo-ml/resources/load_credit_card_dataset_views.sql
 ```
 
 2. Create custom MLModel which uses Gemfire data as its feature store:
 ```
 MLFLOW_TRACKING_URI=${MLFLOW_TRACKING_URI} python demo-ml/resources/random_forest_madlib.py
+```
+
+3. To login to Argo, copy the token from here:
+```
+kubectl -n argo exec $(kubectl get pod -n argo -l 'app=argo-server' -o jsonpath='{.items[0].metadata.name}') -- argo auth token
+```
+
+4. Deploy ML pipeline:
+```
+source .env
+kubectl apply -f demo-ml/argo/ml-pipeline.yaml -n argo
+```
+
+4. View progress:
+```
+watch kubectl get pods -nargo
+```
+
+* To delete the pipeline:
+```
+kubectl delete -f demo-ml/argo/ml-pipeline.yaml -n argo
 ```
 
 ## Alternative: Installing on local workstation <a name=workstation>
