@@ -31,3 +31,6 @@ fraud:
   detection:
     distance-threshold-in-kms: 10
     time-threshold-in-seconds: 600
+
+mlmodel:
+  registry: http://mlflow.tanzudatatap.com

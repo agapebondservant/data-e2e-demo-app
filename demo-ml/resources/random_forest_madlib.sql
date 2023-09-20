@@ -8,7 +8,8 @@ RETURNS table (
     latitude real,
     longitude real,
     is_fraud_flag real,
-    training_run_timestamp bigint
+    training_run_timestamp bigint,
+    cls_weight_label smallint
 )
 as $BODY$
 BEGIN
@@ -23,40 +24,44 @@ BEGIN
 
 	CREATE TABLE rf_credit_card_transactions_training(
 		id serial,
-		time_elapsed bigint,
+		time_elapsed real,
 		amt real,
 		lat real,
 		long real,
-		is_fraud smallint);
+		is_fraud smallint,
+		cls_weight_label smallint);
 
 	-- Inference data
 	create table rf_credit_card_transactions_inference(
 		id serial,
-		time_elapsed bigint,
+		time_elapsed real,
 		amt real,
 		lat real,
 		long real,
-		is_fraud smallint);
+		is_fraud smallint,
+		cls_weight_label smallint);
 
 
 	-- 2. ingest data into training table
-	insert into rf_credit_card_transactions_training (id, time_elapsed, amt, lat, long, is_fraud)
+	insert into rf_credit_card_transactions_training (id, time_elapsed, amt, lat, long, is_fraud, cls_weight_label)
 	select t.index,
 	      t.time_elapsed,
 	      t.amt,
 	      t.lat,
 	      t.long,
-	      t.is_fraud
+	      t.is_fraud,
+	      t.cls_weight_label
 	from credit_card_transactions_training_vw t;
 
 	-- 3. ingest data into inference table
-	insert into rf_credit_card_transactions_inference (id, time_elapsed, amt, lat, long, is_fraud)
+	insert into rf_credit_card_transactions_inference (id, time_elapsed, amt, lat, long, is_fraud, cls_weight_label)
 	select t.index,
 	      t.time_elapsed,
 	      t.amt,
 	      t.lat,
 	      t.long,
-	      t.is_fraud
+	      t.is_fraud,
+	      t.cls_weight_label
 	from credit_card_transactions_inference_vw t;
 
 	-- 4. generate RandomForest model
@@ -66,8 +71,8 @@ BEGIN
 	                           'is_fraud',           -- response
 	                           'time_elapsed, amt, lat, long',   -- features
 	                           NULL,              -- exclude columns
-	                           NULL,              -- grouping columns
-	                           20::integer,       -- number of trees
+	                           'cls_weight_label',              -- grouping columns
+	                           3::integer,       -- number of trees
 	                           2::integer,        -- number of random features
 	                           TRUE::boolean,     -- variable importance
 	                           1::integer,        -- num_permutations
@@ -98,7 +103,8 @@ BEGIN
 	g.lat::real as latitude,
 	g.long::real as longitude,
 	p.estimated_is_fraud::real as is_fraud_flag,
-	m.training_time::bigint as training_run_timestamp
+	m.training_time::bigint as training_run_timestamp,
+	g.cls_weight_label::smallint as cls_weight
 	FROM rf_credit_card_transactions_inference_results p,
 	rf_credit_card_transactions_inference g,
 	metadata m
