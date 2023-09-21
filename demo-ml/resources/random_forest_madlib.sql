@@ -2,7 +2,7 @@
 -- TRAINING
 ---------------------------------------------------------------------------------
 
-DROP FUNCTION run_random_forest_training();
+DROP FUNCTION IF EXISTS run_random_forest_training();
 
 CREATE OR REPLACE FUNCTION public.run_random_forest_training()
 RETURNS table (
@@ -16,6 +16,8 @@ RETURNS table (
     cls_weight_label SMALLINT
 )
 as $BODY$
+DECLARE
+    training_timestamp bigint := (select round(extract(epoch from current_date) + extract(epoch from current_time)));
 BEGIN
 	-- 1. drop and recreate prior RandomForest training tables
 	DROP TABLE IF EXISTS rf_credit_card_transactions_training,
@@ -34,6 +36,11 @@ BEGIN
 		long real,
 		is_fraud SMALLINT,
 		cls_weight_label SMALLINT);
+
+	-- Model versions
+	CREATE TABLE IF NOT EXISTS rf_model_versions (
+	    training_run_timestamp BIGINT
+	);
 
 	-- Inference data
 	create table rf_credit_card_transactions_inference(
@@ -97,23 +104,40 @@ BEGIN
 	                             'rf_credit_card_transactions_inference_results',  -- output table
 	                             'response');           -- show response
 
+	-- 7. log model data in new schema
+	perform create_new_random_forest_training_schema(training_timestamp);
+
 	RETURN QUERY
-    WITH metadata AS (
-        select round(extract(epoch from current_date) + extract(epoch from current_time)) AS training_time
-    )
 	SELECT g.id::bigint as id,
 	g.time_elapsed::bigint as time_passed,
 	g.amt::real as amount,
 	g.lat::real as latitude,
 	g.long::real as longitude,
 	p.estimated_is_fraud::real as is_fraud_flag,
-	m.training_time::bigint as training_run_timestamp,
+	training_timestamp::bigint as training_run_timestamp,
 	g.cls_weight_label::SMALLINT as cls_weight
 	FROM rf_credit_card_transactions_inference_results p,
-	rf_credit_card_transactions_inference g,
-	metadata m
+	rf_credit_card_transactions_inference g
 	WHERE p.id = g.id
 	ORDER BY g.id;
+END;
+$BODY$
+LANGUAGE plpgsql;
+
+
+DROP FUNCTION IF EXISTS create_new_random_forest_training_schema();
+CREATE OR REPLACE FUNCTION public.create_new_random_forest_training_schema(training_run_timestamp bigint)
+RETURNS VOID
+as $BODY$
+BEGIN
+    EXECUTE format('CREATE SCHEMA IF NOT EXISTS %I;'
+    			   'CREATE TABLE %I.rf_credit_card_transactions_model AS SELECT * FROM public.rf_credit_card_transactions_model;'
+                   'CREATE TABLE %I.rf_credit_card_transactions_model_group AS SELECT * FROM public.rf_credit_card_transactions_model_group;'
+                   'CREATE TABLE %I.rf_credit_card_transactions_model_summary AS SELECT * FROM  public.rf_credit_card_transactions_model_summary;'
+                   'CREATE TABLE %I.rf_credit_card_transactions_inference_results AS SELECT * FROM  public.rf_credit_card_transactions_inference_results;'
+                   'CREATE TABLE %I.rf_credit_card_transactions_importances AS SELECT * FROM public.rf_credit_card_transactions_importances;'
+                   'INSERT INTO rf_model_versions(training_run_timestamp) VALUES(%L::bigint);',
+                   training_run_timestamp, training_run_timestamp, training_run_timestamp, training_run_timestamp, training_run_timestamp, training_run_timestamp, training_run_timestamp);
 END;
 $BODY$
 LANGUAGE plpgsql;
@@ -121,9 +145,9 @@ LANGUAGE plpgsql;
 ---------------------------------------------------------------------------------
 -- PREDICTION
 ---------------------------------------------------------------------------------
-DROP FUNCTION setup_madlib_tmp_source_table;
-DROP FUNCTION setup_madlib_tmp_prediction_table;
-DROP FUNCTION run_random_forest_prediction;
+DROP FUNCTION  IF EXISTS setup_madlib_tmp_source_table;
+DROP FUNCTION  IF EXISTS setup_madlib_tmp_prediction_table;
+DROP FUNCTION  IF EXISTS run_random_forest_prediction;
 
 CREATE OR REPLACE FUNCTION setup_madlib_tmp_source_table(table_prefix VARCHAR, id BIGINT, time_elapsed BIGINT, amt real, lat real, long real, cls_weight_label int, is_fraud SMALLINT)
 RETURNS VOID
