@@ -1,0 +1,21 @@
+accelerator:
+  displayName: Sample Fraud Detection ML app
+  description: Sample realtime MLOps project using Spring Cloud Data Flow, Gemfire, Greenplum, Argo Workflows, Apache Madlib and MLflow
+  iconUrl: https://cdn3.iconfinder.com/data/icons/digital-economy-color/64/real-time-analytics-system-data-business-512.png
+  tags:
+  - "ML"
+  - "AI"
+  - "mlflow"
+  - "fraud"
+  - "MLOps"
+  - "python"
+  - "spring"
+  - "gemfire"
+  - "argo"
+  - "greenplum"
+  - "realtime"
+  - "madlib"
+  - "java"
+  - "datascience"
+  - "analytics"
+  - "federatedlearning"

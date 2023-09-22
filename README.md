@@ -17,6 +17,22 @@ To learn more, please see the original git repository <a href="https://gitlab.en
 <hr/>
 </div>
 
+# Deploying Accelerator
+
+* Install App Accelerator: (see https://docs.vmware.com/en/Tanzu-Application-Platform/1.0/tap/GUID-cert-mgr-contour-fcd-install-cert-mgr.html)
+```
+tanzu package available list accelerator.apps.tanzu.vmware.com --namespace tap-install
+tanzu package install accelerator -p accelerator.apps.tanzu.vmware.com -v 1.0.1 -n tap-install -f resources/argo-workflows-accelerator.git.yaml
+Verify that package is running: tanzu package installed get accelerator -n tap-install
+Get the IP address for the App Accelerator API: kubectl get service -n accelerator-system
+```
+
+Publish Accelerator:
+```
+tanzu plugin install --local <path-to-tanzu-cli> all
+tanzu acc create realtime-analytics-acc --git-repository https://github.com/agapebondservant/data-e2e-demo-app.git --git-branch main
+```
+
 ## Pre-requisites for installing on Kubernetes <a name=kubernetes>
 1. Make sure you set up the following pre-requisites:
 - [ ] Kubernetes 1.23+
@@ -182,7 +198,7 @@ export DATA_E2E_ML_TRAINING_DB_PASSWORD=<enter password>
 ```
 export DATA_E2E_ML_TRAINING_DB_PASSWORD=<enter password>
 export PSQL_CONNECT_STR=postgresql://${DATA_E2E_ML_TRAINING_DB_USERNAME}:${DATA_E2E_ML_TRAINING_DB_PASSWORD}@${DATA_E2E_ML_TRAINING_DB_HOST}:${DATA_E2E_ML_TRAINING_DB_PORT}/${DATA_E2E_ML_TRAINING_DB_DATABASE}?sslmode=require
-psql ${PSQL_CONNECT_STR} -f demo-ml/resources/random_forest_madlib.sql
+psql ${PSQL_CONNECT_STR} -f demo-ml/resources/random_forest_madlib_training.sql
 ```
 
 5. Set up Greenplum-Gemfire pipeline by copying the output of the following:
@@ -209,13 +225,28 @@ MLFLOW_TRACKING_URI=${MLFLOW_TRACKING_URI} python demo-ml/resources/random_fores
 kubectl -n argo exec $(kubectl get pod -n argo -l 'app=argo-server' -o jsonpath='{.items[0].metadata.name}') -- argo auth token
 ```
 
-4. Deploy ML pipeline:
+4. Set up kubeseal (one-time op) :
 ```
-source .env
-kubectl apply -f demo-ml/argo/ml-pipeline.yaml -n argo
+https://github.com/bitnami-labs/sealed-secrets
 ```
 
-4. View progress:
+5. Set up ML pipeline secrets (TODO: Use ExternalSecrets instead):
+```
+source .env
+kubectl create secret generic greenplum-training-secret --from-literal=greenplum_master_password=${GP_DATABASE_PW} --dry-run=client -o yaml > training-db-secret.yaml
+kubeseal --scope cluster-wide -o yaml <training-db-secret.yaml> demo-ml/argo/training-db-sealedsecret.yaml
+kubectl create secret generic postgres-inference-secret --from-literal=postgres_password=${PG_DATABASE_PW} --dry-run=client -o yaml > inference-db-secret.yaml
+kubeseal --scope cluster-wide -o yaml <inference-db-secret.yaml> demo-ml/argo/inference-db-sealedsecret.yaml
+kubectl apply -f demo-ml/argo/training-db-sealedsecret.yaml -nargo
+kubectl apply -f demo-ml/argo/inference-db-sealedsecret.yaml -nargo
+```
+
+6. Deploy ML pipeline:
+```
+ytt -f demo-ml/argo/ml-pipeline.yaml -f demo-ml/argo/values.yaml | kubectl apply -n argo -f -
+```
+
+7. View progress:
 ```
 watch kubectl get pods -nargo
 ```

@@ -18,3 +18,5 @@ package.json
 creditcard.csv
 temp.json
 demo-ml/resources/gpdemo.pem
+training-db-secret.yaml
+inference-db-secret.yaml
