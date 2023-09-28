@@ -1,0 +1,34 @@
+#@ load("@ytt:data", "data")
+---
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: random-forest-train-workflow
+spec:
+  schedule: "*/1 * * * *"
+  concurrencyPolicy: "Replace"
+  startingDeadlineSeconds: 0
+  workflowSpec:
+    entrypoint: train
+    templates:
+      - name: train
+        steps:
+          - - name: publish-model
+              template: run-training
+              arguments:
+                parameters:
+                  - name: entrypoint
+                    value: "./app/publish_randomforest_model.py"
+
+      - name: run-training
+        inputs:
+          parameters:
+            - name: entrypoint
+            - name: model_name
+              value: 'model'
+
+        container:
+          image: oawofolu/demo-ml-base
+          command: [ python ]
+          args:
+            - "{{inputs.parameters.entrypoint}}"

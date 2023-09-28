@@ -212,27 +212,38 @@ echo greenplum-inference=jdbc --spring.datasource.url=\"jdbc:postgresql://${DATA
 export DATA_E2E_ML_TRAINING_DB_PASSWORD=<enter password>
 export PSQL_CONNECT_STR=postgresql://${DATA_E2E_ML_TRAINING_DB_USERNAME}:${DATA_E2E_ML_TRAINING_DB_PASSWORD}@${DATA_E2E_ML_TRAINING_DB_HOST}:${DATA_E2E_ML_TRAINING_DB_PORT}/${DATA_E2E_ML_TRAINING_DB_DATABASE}?sslmode=require
 psql ${PSQL_CONNECT_STR} -f demo-ml/resources/load_credit_card_dataset.sql
-psql ${PSQL_CONNECT_STR} -f demo-ml/resources/load_credit_card_dataset_views.sql
+exit
 ```
 
-2. Create custom MLModel which uses Gemfire data as its feature store:
+2. Generate a resampled version of the imported data above:
+```
+pip install -U demo-ml/resources/requirements.txt
+python demo-ml/resources/resample_dataset.py
+```
+
+3. The script above will generate a CSV file with the resampled data (_credit_card_resampled.csv_). 
+Upload the file to your HuggingFace space (see <a href="https://huggingface.co/docs/datasets/share#upload-your-files" target="_blank">link</a>)
+
+4. Create a custom MLModel which uses Gemfire data as its feature store:
 ```
 MLFLOW_TRACKING_URI=${MLFLOW_TRACKING_URI} python demo-ml/resources/random_forest_madlib.py
 ```
 
-3. To login to Argo, copy the token from here:
+5. To login to Argo, copy the token from here:
 ```
 kubectl -n argo exec $(kubectl get pod -n argo -l 'app=argo-server' -o jsonpath='{.items[0].metadata.name}') -- argo auth token
 ```
 
-4. Set up kubeseal (one-time op) :
+6. Set up kubeseal (one-time op) :
 ```
 https://github.com/bitnami-labs/sealed-secrets
 ```
 
-5. Set up ML pipeline secrets (TODO: Use ExternalSecrets instead):
+7. Set up ML pipeline secrets (TODO: Use ExternalSecrets instead):
 ```
 source .env
+export GP_DATABASE_PW=<greenplum master password>
+export PG_DATABASE_PW=<postgres inference password>
 kubectl create secret generic greenplum-training-secret --from-literal=greenplum_master_password=${GP_DATABASE_PW} --dry-run=client -o yaml > training-db-secret.yaml
 kubeseal --scope cluster-wide -o yaml <training-db-secret.yaml> demo-ml/argo/training-db-sealedsecret.yaml
 kubectl create secret generic postgres-inference-secret --from-literal=postgres_password=${PG_DATABASE_PW} --dry-run=client -o yaml > inference-db-secret.yaml
@@ -241,12 +252,12 @@ kubectl apply -f demo-ml/argo/training-db-sealedsecret.yaml -nargo
 kubectl apply -f demo-ml/argo/inference-db-sealedsecret.yaml -nargo
 ```
 
-6. Deploy ML pipeline:
+8. Deploy ML pipeline:
 ```
 ytt -f demo-ml/argo/ml-pipeline.yaml -f demo-ml/argo/values.yaml | kubectl apply -n argo -f -
 ```
 
-7. View progress:
+9. View progress:
 ```
 watch kubectl get pods -nargo
 ```

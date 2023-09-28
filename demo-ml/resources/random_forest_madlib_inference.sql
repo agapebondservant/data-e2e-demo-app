@@ -1,6 +1,73 @@
 ---------------------------------------------------------------------------------
 -- PREDICTION
 ---------------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS "rf_credit_card_transactions_model" (
+"gid" INTEGER,
+"sample_id" INTEGER,
+"tree" MADLIB.BYTEA8);
+
+CREATE TABLE IF NOT EXISTS "rf_credit_card_transactions_importances" (
+"cls_weight_label" SMALLINT,
+"feature" TEXT,
+"oob_var_importance" FLOAT8,
+"impurity_var_importance" FLOAT8);
+
+CREATE TABLE IF NOT EXISTS "rf_credit_card_transactions_inference_results" (
+"id" INTEGER,
+"estimated_is_fraud" SMALLINT);
+
+CREATE TABLE IF NOT EXISTS "rf_credit_card_transactions_model_group" (
+"gid" INTEGER, "cls_weight_label" SMALLINT,
+"success" BOOLEAN,
+"cat_n_levels" INT4[],
+"cat_levels_in_text" TEXT[],
+"oob_error" numeric,
+"oob_var_importance" FLOAT8[],
+"impurity_var_importance" FLOAT8[]);
+
+CREATE TABLE IF NOT EXISTS "rf_credit_card_transactions_model_summary" (
+"method" TEXT,
+"is_classification" BOOLEAN,
+"source_table" TEXT,
+"model_table" TEXT,
+"id_col_name" TEXT,
+"dependent_varname" TEXT,
+"independent_varnames" TEXT,
+"cat_features" TEXT,
+"con_features" TEXT,
+"grouping_cols" TEXT,
+"num_trees" INTEGER,
+"num_random_features" INTEGER,
+"max_tree_depth" INTEGER,
+"min_split" INTEGER,
+"min_bucket" INTEGER,
+"num_splits" INTEGER,
+"verbose" BOOLEAN,
+"importance" BOOLEAN,
+"num_permutations" INTEGER,
+"num_all_groups" INTEGER,
+"num_failed_groups" INTEGER,
+"total_rows_processed" INTEGER,
+"total_rows_skipped" INTEGER,
+"dependent_var_levels" TEXT,
+"dependent_var_type" TEXT,
+"independent_var_types" TEXT,
+"null_proxy" TEXT);
+
+-- Model versions
+CREATE TABLE IF NOT EXISTS rf_model_versions (
+    training_run_timestamp BIGINT
+);
+
+create table IF NOT EXISTS rf_credit_card_transactions_inference(
+    id serial,
+    time_elapsed real,
+    amt real,
+    lat real,
+    long real,
+    is_fraud SMALLINT,
+    cls_weight_label SMALLINT);
+
 CREATE TABLE IF NOT EXISTS rf_model_versions_local (
     training_run_timestamp BIGINT
 );
