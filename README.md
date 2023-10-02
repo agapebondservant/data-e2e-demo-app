@@ -53,6 +53,11 @@ for orig in `find . -name "*.in.*" -type f`; do
 done
 ```
 
+3. (For TAP 1.6+) Deploy additional ClusterBuilders:
+```
+kubectl apply -f deploy/templates/demo-cluster/
+```
+
 ### Set up Gemfire and RabbitMQ <a name=gemfire-and-rabbit>
 1. Create target namespace for backing services:
 ```

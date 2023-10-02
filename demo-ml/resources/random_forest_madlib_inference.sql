@@ -56,7 +56,8 @@ CREATE TABLE IF NOT EXISTS "rf_credit_card_transactions_model_summary" (
 
 -- Model versions
 CREATE TABLE IF NOT EXISTS rf_model_versions (
-    training_run_timestamp BIGINT
+    training_run_timestamp BIGINT,
+    passed BOOLEAN
 );
 
 create table IF NOT EXISTS rf_credit_card_transactions_inference(
@@ -87,10 +88,11 @@ DECLARE
 BEGIN
 	SELECT t.training_run_timestamp FROM
         (SELECT training_run_timestamp, rank() OVER (order by training_run_timestamp)
-         FROM rf_model_versions) t
+         FROM rf_model_versions
+         WHERE passed IS TRUE) t
     INTO model_version
     WHERE t.rank=least( (select count(1) from rf_model_versions_local) + 1,
-                      (select count(1) from rf_model_versions) );
+                      (select count(1) from rf_model_versions WHERE passed IS TRUE) );
     RETURN model_version;
 END;
 $BODY$
@@ -146,10 +148,14 @@ $$
 DECLARE
 	table_prefix VARCHAR;
 	model_version BIGINT;
+	model_passed BOOLEAN;
 	done VARCHAR;
 	result SMALLINT;
 BEGIN
 	SELECT get_model_version() INTO model_version;
+	IF model_version IS NULL THEN
+	    RAISE EXCEPTION 'No passing RandomForest model found' USING HINT = 'EXCEPTION: Either no candidate model exists, or the existing candidate model(s) did not pass model selection based on evaluation criteria.';
+	END IF;
 	SELECT 'm' || model_version INTO table_prefix;
 	SELECT setup_madlib_tmp_source_table(table_prefix, id, time_elapsed, amt, lat, long, cls_weight_label, is_fraud) INTO done;
 	SELECT setup_madlib_tmp_prediction_table(table_prefix) INTO done;

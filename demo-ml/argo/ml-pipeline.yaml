@@ -6,7 +6,7 @@ metadata:
   name: random-forest-train-workflow
 spec:
   schedule: "*/1 * * * *"
-  concurrencyPolicy: "Replace"
+  concurrencyPolicy: "Forbid"
   startingDeadlineSeconds: 0
   workflowSpec:
     entrypoint: train
