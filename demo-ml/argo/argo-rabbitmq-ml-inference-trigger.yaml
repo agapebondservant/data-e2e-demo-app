@@ -66,10 +66,12 @@ spec:
                           value: #@ data.values.training_external_secret_ref
                         - name: source_external_secret_ref_key
                           value: #@ data.values.training_external_secret_ref_key
-                        - name: inference_db_script
+                        - name: db_script
                           values: #@ data.values.inference_db_script
-                        - name: inference_db_schema
+                        - name: db_schema
                           values: #@ data.values.inference_db_schema
+                        - name: shell_script
+                          value: #@ data.values.inference_db_shell_script
                     script:
                       image: liquibase/liquibase
                       env:
@@ -85,8 +87,10 @@ spec:
                               key: "{{inputs.parameters.source_external_secret_ref_key}}"
                       command: [ bash ]
                       source: |
-                        sed -i "s/XYZCHANGESETID/$(date +%s)/g; s/XYZDBSCHEMA/"{{inputs.parameters.db_schema}}"/g;" \
-                        "{{inputs.parameters.script_shared_path}}"/"{{inputs.parameters.db_script}}";
+                        DB_SCHEMA="{{inputs.parameters.db_schema}}" \
+                        SHARED_PATH="{{inputs.parameters.script_shared_path}}" \
+                        DB_SCRIPT="{{inputs.parameters.db_script}}" \
+                        "{{inputs.parameters.shell_script}}";
 
                         liquibase update \
                         --changelog-file="{{inputs.parameters.script_shared_path}}"/"{{inputs.parameters.db_script}}" \

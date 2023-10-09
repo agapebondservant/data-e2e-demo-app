@@ -54,9 +54,12 @@ spec:
             - name: script_shared_path
               value: #@ data.values.script_shared_path
             - name: db_script
-              values: #@ data.values.training_db_script
+              value: #@ data.values.training_db_script
             - name: db_schema
-              values: #@ data.values.training_db_schema
+              value: #@ data.values.training_db_schema
+            - name: shell_script
+              value: #@ data.values.training_db_shell_script
+
         script:
           image: liquibase/liquibase
           mirrorVolumeMounts: true
@@ -68,8 +71,10 @@ spec:
                   key: "{{inputs.parameters.external_secret_ref_key}}"
           command: [bash]
           source: |
-            sed -i "s/XYZCHANGESETID/$(date +%s)/g; s/XYZDBSCHEMA/"{{inputs.parameters.db_schema}}"/g;" \
-            "{{inputs.parameters.script_shared_path}}"/"{{inputs.parameters.db_script}}";
+            DB_SCHEMA="{{inputs.parameters.db_schema}}" \
+            SHARED_PATH="{{inputs.parameters.script_shared_path}}" \
+            DB_SCRIPT="{{inputs.parameters.db_script}}" \
+            "{{inputs.parameters.shell_script}}";
 
             liquibase execute-sql \
             --url="{{inputs.parameters.db_uri}}" \
