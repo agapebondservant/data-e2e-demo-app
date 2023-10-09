@@ -269,7 +269,6 @@ kubectl apply -f demo-ml/argo/inference-db-sealedsecret.yaml -nargo
 
 8. Deploy ML pipelines:
 ```
-# ytt -f demo-ml/argo/ml-pipeline.yaml -f demo-ml/argo/values.yaml | kubectl apply -nargo -f -
 ytt -f demo-ml/argo/install-argo-events-eventbus.yaml | kubectl apply -nargo -f -
 ytt -f demo-ml/argo/argo-rabbitmq-eventsource.yaml -f demo-ml/argo/values.yaml  | kubectl apply -nargo -f -
 ytt -f demo-ml/argo/argo-rabbitmq-ml-inference-trigger.yaml -f demo-ml/argo/values.yaml  | kubectl apply -nargo -f -

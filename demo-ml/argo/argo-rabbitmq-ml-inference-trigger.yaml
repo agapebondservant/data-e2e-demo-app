@@ -66,6 +66,10 @@ spec:
                           value: #@ data.values.training_external_secret_ref
                         - name: source_external_secret_ref_key
                           value: #@ data.values.training_external_secret_ref_key
+                        - name: inference_db_script
+                          values: #@ data.values.inference_db_script
+                        - name: inference_db_schema
+                          values: #@ data.values.inference_db_schema
                     script:
                       image: liquibase/liquibase
                       env:
@@ -81,6 +85,15 @@ spec:
                               key: "{{inputs.parameters.source_external_secret_ref_key}}"
                       command: [ bash ]
                       source: |
+                        sed -i "s/XYZCHANGESETID/$(date +%s)/g; s/XYZDBSCHEMA/"{{inputs.parameters.db_schema}}"/g;" \
+                        "{{inputs.parameters.script_shared_path}}"/"{{inputs.parameters.db_script}}";
+
+                        liquibase update \
+                        --changelog-file="{{inputs.parameters.script_shared_path}}"/"{{inputs.parameters.db_script}}" \
+                        --url="{{inputs.parameters.db_uri}}" \
+                        --username="{{inputs.parameters.user}}" \
+                        --password="${HOST_PASSWORD}";
+
                         liquibase generateChangeLog \
                         --changeLogFile="sample.sql" \
                         --url="{{inputs.parameters.source_db_uri}}" \
@@ -91,7 +104,7 @@ spec:
                         liquibase execute-sql \
                         --url="{{inputs.parameters.db_uri}}" \
                         --username="{{inputs.parameters.user}}" --password="${HOST_PASSWORD}" \
-                        --sql="UPDATE databasechangeloglock SET LOCKED=0::boolean, LOCKGRANTED=null, LOCKEDBY=null where ID=1; TRUNCATE TABLE rf_credit_card_transactions_importances; TRUNCATE TABLE rf_credit_card_transactions_inference_results; TRUNCATE TABLE rf_credit_card_transactions_model; TRUNCATE TABLE rf_credit_card_transactions_model_group; TRUNCATE TABLE rf_credit_card_transactions_model_summary;";
+                        --sql="TRUNCATE TABLE rf_credit_card_transactions_importances; TRUNCATE TABLE rf_credit_card_transactions_inference_results; TRUNCATE TABLE rf_credit_card_transactions_model; TRUNCATE TABLE rf_credit_card_transactions_model_group; TRUNCATE TABLE rf_credit_card_transactions_model_summary;";
 
                         liquibase update \
                         --changelog-file="sample.sql" \
