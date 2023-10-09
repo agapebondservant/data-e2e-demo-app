@@ -8,6 +8,8 @@ script_shared_path:
 mlpipeline_git_repo:
 pyfunction_vendored_dependencies_uri:
 mlflow_s3_uri:
+shared_rabbit_secret:
+shared_rabbit_host:
 
 training_shared_path:
 training_db_script:
