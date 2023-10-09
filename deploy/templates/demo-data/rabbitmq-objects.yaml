@@ -56,3 +56,40 @@ spec:
   durable: true
   rabbitmqClusterReference:
     name: rmqanomaly
+---
+apiVersion: rabbitmq.com/v1beta1
+kind: Exchange
+metadata:
+  name: mds-fraud-transactions-exchange-global
+spec:
+  name: mds-fraud-transactions-exchange-global
+  type: topic
+  autoDelete: false
+  durable: true
+  rabbitmqClusterReference:
+    name: rmqanomaly
+---
+apiVersion: rabbitmq.com/v1beta1
+kind: Exchange
+metadata:
+  name: mds-fraud-transactions-alt-exchange
+spec:
+  name: mds-fraud-transactions-alt-exchange
+  type: fanout
+  autoDelete: false
+  durable: true
+  rabbitmqClusterReference:
+    name: rmqanomaly
+---
+apiVersion: rabbitmq.com/v1beta1
+kind: Policy
+metadata:
+  name: mds-fraud-alt-exchange-policy
+spec:
+  name: mds-fraud-alt-exchange-policy
+  pattern: "^mds-fraud-transactions."
+  applyTo: "exchanges"
+  definition:
+    alternate-exchange: mds-fraud-transactions-alt-exchange
+  rabbitmqClusterReference:
+    name: rmqanomaly

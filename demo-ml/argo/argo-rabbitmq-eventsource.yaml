@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: amqp
+spec:
+  amqp:
+    fraud-detection:
+      url: amqp://a1fb9dcb4d9f948cd87a3ef745004bf1-1827317288.us-east-1.elb.amazonaws.com:5672
+      jsonBody: true
+      exchangeName: mds-fraud-transactions-exchange-global
+      exchangeType: topic
+      routingKey: downstream.randomforest.madlib
+      connectionBackoff:
+        duration: 10s
+        steps: 5
+        factor: 2
+        jitter: 0.2
+      exchangeDeclare:
+        durable: true
+        autoDelete: false
+        internal: false
+        noWait: false
+      queueDeclare:
+        name: downstream.randomforest.madlib
+        durable: false
+        autoDelete: false
+        exclusive: true
+        noWait: false
+        # arguments: |-
+        #  x-queue-type: quorum
+      queueBind:
+        noWait: false
+      auth:
+        username:
+          name: rmqanomaly-default-user
+          key: username
+        password:
+          name: rmqanomaly-default-user
+          key: password

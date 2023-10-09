@@ -58,6 +58,13 @@ done
 kubectl apply -f deploy/templates/demo-cluster/
 ```
 
+4. Deploy Argo Events:
+```
+kubectl create namespace argo-events
+kubectl apply -f demo-ml/argo/install-argo-events.yaml 
+kubectl apply -f demo-ml/argo/install-argo-events-validatinghook.yaml 
+```
+
 ### Set up Gemfire and RabbitMQ <a name=gemfire-and-rabbit>
 1. Create target namespace for backing services:
 ```
@@ -88,7 +95,7 @@ watch kubectl get all -n $DEMO_NS
 
 6. Create Gemfire regions:
 ```
-kubectl exec -it gfanomaly-server-0 -n $DEMO_NS -- gfsh -e "connect --locator=gfanomaly-locator-0.gfanomaly-locator.anomaly-ns.svc.cluster.local[10334]" -e "create region --name=mds-region --type=PARTITION --enable-statistics --entry-idle-time-expiration=300" -e "create region --name=mds-region-greenplum --type=PARTITION --enable-statistics --entry-idle-time-expiration=300" -e "create region --name=mds-region-greenplum-offset --type=PARTITION --enable-statistics --entry-idle-time-expiration=300"
+kubectl exec -it gfanomaly-server-0 -n $DEMO_NS -- gfsh -e "connect --locator=gfanomaly-locator-0.gfanomaly-locator.anomaly-ns.svc.cluster.local[10334]" -e "create region --name=mds-region --type=PARTITION --enable-statistics --entry-idle-time-expiration=300" -e "create region --name=mds-region-greenplum --type=PARTITION --enable-statistics --entry-idle-time-expiration=300" -e "create region --name=mds-region-greenplum-snapshot --type=PARTITION --eviction-entry-count=2 --eviction-action=overflow-to-disk"
 ```
 
 7. Deploy RabbitMQ operator (if it has not already been installed):
@@ -208,7 +215,10 @@ psql ${PSQL_CONNECT_STR} -f demo-ml/resources/random_forest_madlib_training.sql
 
 5. Set up Greenplum-Gemfire pipeline by copying the output of the following:
 ```
-echo greenplum-inference=jdbc --spring.datasource.url=\"jdbc:postgresql://${DATA_E2E_ML_TRAINING_DB_HOST}:5432/${DATA_E2E_ML_TRAINING_DB_DATABASE}\" --spring.datasource.username=\"gpadmin\" --spring.datasource.password=\"${DATA_E2E_ML_TRAINING_DB_PASSWORD}\" --spring.cloud.stream.poller.cron=\"0 0 0 \* \* \*\" --jdbc.supplier.query=\"select row_to_json\(randomforest\) from \(select id, time_passed, amount, latitude, longitude, is_fraud_flag, training_run_timestamp from public.run_random_forest_training\(\) limit 1000 \) randomforest\" \| transform --spel.function.expression=\"#jsonPath\(payload, \'$.row_to_json.value\'\)\"  \| gemfire --gemfire.pool.host-addresses=\"gfanomaly-locator-0.gfanomaly-locator.anomaly-ns.svc.cluster.local:10334\" --gemfire.region.regionName=\"mds-region-greenplum\" --gemfire.sink.json=\"true\" --gemfire.sink.keyExpression=\"payload.getField\(\'id\'\)\"
+export DATA_E2E_ML_TRAINING_DB_PASSWORD=<enter password>
+echo -e greenplum-inference=jdbc --spring.datasource.url=\"jdbc:postgresql://${DATA_E2E_ML_TRAINING_DB_HOST}:5432/${DATA_E2E_ML_TRAINING_DB_DATABASE}\" --spring.datasource.username=\"gpadmin\" --spring.datasource.password=\"${DATA_E2E_ML_TRAINING_DB_PASSWORD}\" --spring.cloud.stream.poller.cron=\"0 0 0 \* \* \*\" --jdbc.supplier.query=\"select row_to_json\(randomforest\) from \(SELECT id, time_passed, amount, latitude, longitude, is_fraud_flag, training_run_timestamp, cls_weight FROM rf_credit_card_inferences_vw limit 1000 \) randomforest\" \| transform --spel.function.expression=\"#jsonPath\(payload, \'$.row_to_json.value\'\)\"  \| gemfire --gemfire.pool.host-addresses=\"gfanomaly-locator-0.gfanomaly-locator.anomaly-ns.svc.cluster.local:10334\" --gemfire.region.regionName=\"mds-region-greenplum\" --gemfire.sink.json=\"true\" --gemfire.sink.keyExpression=\"payload.getField\(\'id\'\)\" \\n\
+greenplum-inference-monitor=jdbc --spring.datasource.url=\"jdbc:postgresql://${DATA_E2E_ML_TRAINING_DB_HOST}:5432/${DATA_E2E_ML_TRAINING_DB_DATABASE}\" --spring.datasource.username=\"gpadmin\" --spring.datasource.password=\"${DATA_E2E_ML_TRAINING_DB_PASSWORD}\" --spring.cloud.stream.poller.cron=\"0 0 0 \* \* \*\" --jdbc.supplier.query=\"select row_to_json\(randomforest\) from \(SELECT max\(training_run_timestamp\) as snapshot FROM rf_credit_card_inferences_vw\) randomforest\" \| transform --spel.function.expression=\"#jsonPath\(payload, \'$.row_to_json.value\'\)\"  \| gemfire --gemfire.pool.host-addresses=\"gfanomaly-locator-0.gfanomaly-locator.anomaly-ns.svc.cluster.local:10334\" --gemfire.region.regionName=\"mds-region-greenplum-snapshot\" --gemfire.sink.json=\"true\" --gemfire.sink.keyExpression=\"payload.getField\(\'snapshot\'\)\"
+
 ```
 
 ### Integrating ML/MLOps <a name=mlops>
@@ -257,9 +267,13 @@ kubectl apply -f demo-ml/argo/training-db-sealedsecret.yaml -nargo
 kubectl apply -f demo-ml/argo/inference-db-sealedsecret.yaml -nargo
 ```
 
-8. Deploy ML pipeline:
+8. Deploy ML pipelines:
 ```
-ytt -f demo-ml/argo/ml-pipeline.yaml -f demo-ml/argo/values.yaml | kubectl apply -n argo -f -
+# ytt -f demo-ml/argo/ml-pipeline.yaml -f demo-ml/argo/values.yaml | kubectl apply -nargo -f -
+ytt -f demo-ml/argo/install-argo-events-eventbus.yaml | kubectl apply -nargo -f -
+ytt -f demo-ml/argo/argo-rabbitmq-eventsource.yaml -f demo-ml/argo/values.yaml  | kubectl apply -nargo -f -
+ytt -f demo-ml/argo/argo-rabbitmq-ml-inference-trigger.yaml -f demo-ml/argo/values.yaml  | kubectl apply -nargo -f -
+ytt -f demo-ml/argo/ml-training-pipeline.yaml -f demo-ml/argo/values.yaml | kubectl apply -nargo -f -
 ```
 
 9. View progress:
@@ -267,9 +281,12 @@ ytt -f demo-ml/argo/ml-pipeline.yaml -f demo-ml/argo/values.yaml | kubectl apply
 watch kubectl get pods -nargo
 ```
 
-* To delete the pipeline:
+* To delete the pipelines:
 ```
-kubectl delete -f demo-ml/argo/ml-pipeline.yaml -n argo
+ytt -f demo-ml/argo/ml-training-pipeline.yaml -f demo-ml/argo/values.yaml | kubectl delete -nargo -f -
+ytt -f demo-ml/argo/argo-rabbitmq-eventsource.yaml -f demo-ml/argo/values.yaml  | kubectl delete -nargo -f -
+ytt -f demo-ml/argo/argo-rabbitmq-ml-inference-trigger.yaml -f demo-ml/argo/values.yaml  | kubectl delete -nargo -f -
+ytt -f demo-ml/argo/install-argo-events-eventbus.yaml | kubectl delete -nargo -f -
 ```
 
 ## Alternative: Installing on local workstation <a name=workstation>
