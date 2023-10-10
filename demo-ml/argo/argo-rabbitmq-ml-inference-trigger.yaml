@@ -12,8 +12,8 @@ spec:
   triggers:
     - template:
         name: amqp-workflow-trigger
-        argoWorkflow:
-          operation: submit
+        k8s:
+          operation: create
           source:
             resource:
               apiVersion: argoproj.io/v1alpha1
@@ -102,7 +102,8 @@ spec:
                         --password="${HOST_PASSWORD}";
 
                         liquibase generateChangeLog \
-                        --changeLogFile="sample.sql" \
+                        --logLevel=INFO \
+                        --changeLogFile=changelog/sample.sql \
                         --url="{{inputs.parameters.source_db_uri}}" \
                         --username="{{inputs.parameters.source_user}}" --password="${SOURCE_HOST_PASSWORD}" --diff-types="data" \
                         --overwrite-output-file=true \
@@ -114,13 +115,13 @@ spec:
                         --sql="TRUNCATE TABLE rf_credit_card_transactions_importances; TRUNCATE TABLE rf_credit_card_transactions_inference_results; TRUNCATE TABLE rf_credit_card_transactions_model; TRUNCATE TABLE rf_credit_card_transactions_model_group; TRUNCATE TABLE rf_credit_card_transactions_model_summary;";
 
                         liquibase update \
-                        --changeLogFile="sample.sql" \
+                        --changeLogFile=changelog/sample.sql \
                         --url="{{inputs.parameters.db_uri}}" \
                         --username="{{inputs.parameters.user}}" \
                         --password="${HOST_PASSWORD}";
 
                         liquibase changeLogSync \
-                        --changeLogFile="sample.sql" \
+                        --changeLogFile=changelog/sample.sql \
                         --url="{{inputs.parameters.db_uri}}" \
                         --username="{{inputs.parameters.user}}" \
                         --password="${HOST_PASSWORD}";
