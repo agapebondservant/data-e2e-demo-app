@@ -90,7 +90,7 @@ spec:
                         DB_SCHEMA="{{inputs.parameters.db_schema}}" \
                         SHARED_PATH="{{inputs.parameters.script_shared_path}}" \
                         DB_SCRIPT="{{inputs.parameters.db_script}}" \
-                        "{{inputs.parameters.shell_script}}";
+                        "{{inputs.parameters.script_shared_path}}"/"{{inputs.parameters.shell_script}}";
 
                         liquibase update \
                         --changelog-file="{{inputs.parameters.script_shared_path}}"/"{{inputs.parameters.db_script}}" \
