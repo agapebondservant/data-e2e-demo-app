@@ -70,9 +70,9 @@ spec:
                         - name: source_external_secret_ref_key
                           value: #@ data.values.training_external_secret_ref_key
                         - name: db_script
-                          values: #@ data.values.inference_db_script
+                          value: #@ data.values.inference_db_script
                         - name: db_schema
-                          values: #@ data.values.inference_db_schema
+                          value: #@ data.values.inference_db_schema
                         - name: shell_script
                           value: #@ data.values.inference_db_shell_script
                     script:
