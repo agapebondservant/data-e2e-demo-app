@@ -1,5 +1,5 @@
 --liquibase formatted sql
---changeset postgres:XYZCHANGESETID
+--changeset postgres:XYZCHANGESETID splitStatements:false
 ---------------------------------------------------------------------------------
 -- PREDICTION
 ---------------------------------------------------------------------------------
