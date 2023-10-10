@@ -109,6 +109,9 @@ spec:
         container:
           image: oawofolu/demo-ml-base
           command: [ python ]
+          securityContext:
+            runAsUser: 0
+            fsGroup: 1000
           env:
             - name: rmq_user
               valueFrom:
