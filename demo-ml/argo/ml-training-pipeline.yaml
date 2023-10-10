@@ -74,11 +74,6 @@ spec:
                   key: "{{inputs.parameters.external_secret_ref_key}}"
           command: [bash]
           source: |
-            liquibase execute-sql \
-            --url="{{inputs.parameters.db_uri}}" \
-            --username="{{inputs.parameters.user}}" --password="${HOST_PASSWORD}" \
-            --sql="UPDATE databasechangeloglock SET LOCKED=0::boolean, LOCKGRANTED=null, LOCKEDBY=null where ID=1;";
-
             DB_SCHEMA="{{inputs.parameters.db_schema}}" \
             SHARED_PATH="{{inputs.parameters.script_shared_path}}" \
             DB_SCRIPT="{{inputs.parameters.db_script}}" \
@@ -90,10 +85,15 @@ spec:
             --username="{{inputs.parameters.user}}" \
             --password="${HOST_PASSWORD}";
 
-            liquibase execute-sql \
+            liquibase executeSql \
             --url="{{inputs.parameters.db_uri}}" \
             --username="{{inputs.parameters.user}}" --password="${HOST_PASSWORD}" \
             --sql="SELECT run_random_forest_training()";
+
+            liquibase releaseLocks \
+            --url="{{inputs.parameters.db_uri}}" \
+            --username="{{inputs.parameters.user}}" \
+            --password="${HOST_PASSWORD}";
 
 
       - name: run-training

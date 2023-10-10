@@ -1,3 +1,4 @@
+import mlflow
 from mlflow import MlflowClient
 import subprocess
 import os
@@ -16,6 +17,15 @@ for rm in client.search_registered_models():
 print("Model registry cleanup complete.")
 
 """
+Clean up default model runs
+"""
+print("Cleaning up default experiment...")
+runs = mlflow.search_runs(output_format='list')
+for run in runs:
+    mlflow.delete_run(run.info.run_id)
+    print(f"MLflow Run ID {run.info.run_id} deleted.")
+
+"""
 Clean up pipelines
 """
 print("Cleaning up ML pipelines...")
@@ -27,11 +37,10 @@ subprocess.run(
 print("ML pipelines cleanup complete.")
 
 """
-Clean up database
+Clean up training database
 """
-print("Cleaning up database...")
+print("Cleaning up training database...")
 subprocess.run(
-    f'psql {os.path.expandvars("${PSQL_CONNECT_STR}")} -c "UPDATE DATABASECHANGELOGLOCK SET LOCKED=0::boolean, LOCKGRANTED=null, LOCKEDBY=null where ID=1;"; ' +
     f'psql {os.path.expandvars("${PSQL_CONNECT_STR}")} -c "TRUNCATE TABLE rf_model_versions ; TRUNCATE TABLE rf_credit_card_transactions_model_evaluations;"; ' +
     f'psql {os.path.expandvars("${PSQL_CONNECT_STR}")} -c "DO \\$\\$ DECLARE s text; BEGIN FOR s IN SELECT nspname FROM pg_namespace WHERE nspname LIKE \'m1\\_%\' LOOP EXECUTE \'DROP SCHEMA "\' || quote_ident(s) || \'" CASCADE\'; END LOOP; END;\\$\\$;"; ',
     shell=True

@@ -114,13 +114,18 @@ spec:
                         --sql="TRUNCATE TABLE rf_credit_card_transactions_importances; TRUNCATE TABLE rf_credit_card_transactions_inference_results; TRUNCATE TABLE rf_credit_card_transactions_model; TRUNCATE TABLE rf_credit_card_transactions_model_group; TRUNCATE TABLE rf_credit_card_transactions_model_summary;";
 
                         liquibase update \
-                        --changelog-file="sample.sql" \
+                        --changeLogFile="sample.sql" \
                         --url="{{inputs.parameters.db_uri}}" \
                         --username="{{inputs.parameters.user}}" \
                         --password="${HOST_PASSWORD}";
 
                         liquibase changeLogSync \
-                        --changelog-file="sample.sql" \
+                        --changeLogFile="sample.sql" \
+                        --url="{{inputs.parameters.db_uri}}" \
+                        --username="{{inputs.parameters.user}}" \
+                        --password="${HOST_PASSWORD}";
+
+                        liquibase releaseLocks \
                         --url="{{inputs.parameters.db_uri}}" \
                         --username="{{inputs.parameters.user}}" \
                         --password="${HOST_PASSWORD}";
