@@ -96,7 +96,7 @@ spec:
                         "{{inputs.parameters.script_shared_path}}"/"{{inputs.parameters.shell_script}}";
 
                         liquibase update \
-                        --changelog-file="{{inputs.parameters.script_shared_path}}"/"{{inputs.parameters.db_script}}" \
+                        --changelog-file=changelog/"{{inputs.parameters.db_script}}" \
                         --url="{{inputs.parameters.db_uri}}" \
                         --username="{{inputs.parameters.user}}" \
                         --password="${HOST_PASSWORD}";

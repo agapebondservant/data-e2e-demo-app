@@ -85,7 +85,7 @@ spec:
             --sql="UPDATE databasechangeloglock SET LOCKED=0::boolean, LOCKGRANTED=null, LOCKEDBY=null where ID=1;";
 
             liquibase update \
-            --changelog-file="{{inputs.parameters.script_shared_path}}"/"{{inputs.parameters.db_script}}" \
+            --changelog-file=changelog/"{{inputs.parameters.db_script}}" \
             --url="{{inputs.parameters.db_uri}}" \
             --username="{{inputs.parameters.user}}" \
             --password="${HOST_PASSWORD}";
