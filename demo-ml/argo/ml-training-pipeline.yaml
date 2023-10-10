@@ -13,6 +13,9 @@ spec:
   concurrencyPolicy: "Forbid"
   startingDeadlineSeconds: 0
   workflowSpec:
+    securityContext:
+      runAsUser: 1000
+      fsGroup: 1000
     entrypoint: train
     templates:
       - name: train
