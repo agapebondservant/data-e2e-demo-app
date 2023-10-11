@@ -210,7 +210,7 @@ export DATA_E2E_ML_TRAINING_DB_PASSWORD=<enter password>
 ```
 export DATA_E2E_ML_TRAINING_DB_PASSWORD=<enter password>
 export PSQL_CONNECT_STR=postgresql://${DATA_E2E_ML_TRAINING_DB_USERNAME}:${DATA_E2E_ML_TRAINING_DB_PASSWORD}@${DATA_E2E_ML_TRAINING_DB_HOST}:${DATA_E2E_ML_TRAINING_DB_PORT}/${DATA_E2E_ML_TRAINING_DB_DATABASE}?sslmode=require
-psql ${PSQL_CONNECT_STR} -f demo-ml/resources/random_forest_madlib_training.sql
+psql ${PSQL_CONNECT_STR} -f demo-ml/resources/sql/random_forest_madlib_training.sql
 ```
 
 5. Set up Greenplum-Gemfire pipeline by copying the output of the following:
@@ -226,7 +226,7 @@ greenplum-inference-monitor=jdbc --spring.datasource.url=\"jdbc:postgresql://${D
 ```
 export DATA_E2E_ML_TRAINING_DB_PASSWORD=<enter password>
 export PSQL_CONNECT_STR=postgresql://${DATA_E2E_ML_TRAINING_DB_USERNAME}:${DATA_E2E_ML_TRAINING_DB_PASSWORD}@${DATA_E2E_ML_TRAINING_DB_HOST}:${DATA_E2E_ML_TRAINING_DB_PORT}/${DATA_E2E_ML_TRAINING_DB_DATABASE}?sslmode=require
-psql ${PSQL_CONNECT_STR} -f demo-ml/resources/load_credit_card_dataset.sql
+psql ${PSQL_CONNECT_STR} -f demo-ml/resources/sql/load_credit_card_dataset.sql
 exit
 ```
 
