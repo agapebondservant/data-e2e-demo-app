@@ -29,6 +29,7 @@ spec:
                   runAsUser: 1000
                   fsGroup: 1000
                 entrypoint: train
+                onExit: exit-handler
                 synchronization:
                   mutex:
                     name: fraud-detection
@@ -37,6 +38,28 @@ spec:
                     steps:
                       - - name: deploy-inference
                           template: deploy-inference-db
+
+                  - name: exit-handler
+                    inputs:
+                      parameters:
+                        - name: user
+                          value: #@ data.values.inference_user
+                        - name: db_uri
+                          value: #@ data.values.inference_db_uri
+                    script:
+                      image: liquibase/liquibase
+                      env:
+                        - name: HOST_PASSWORD
+                          valueFrom:
+                            secretKeyRef:
+                              name: "{{inputs.parameters.external_secret_ref}}"
+                              key: "{{inputs.parameters.external_secret_ref_key}}"
+                      command: [ bash ]
+                      source: |
+                        liquibase releaseLocks \
+                        --url="{{inputs.parameters.db_uri}}" \
+                        --username="{{inputs.parameters.user}}" \
+                        --password="${HOST_PASSWORD}";
 
                   - name: deploy-inference-db
                     inputs:
@@ -97,6 +120,8 @@ spec:
                               key: "{{inputs.parameters.external_secret_ref_key}}"
                       command: [ bash ]
                       source: |
+                        set -e;
+
                         DB_SCHEMA="{{inputs.parameters.db_schema}}" \
                         SHARED_PATH="{{inputs.parameters.script_shared_path}}" \
                         DB_SCRIPT="{{inputs.parameters.db_script}}" \
@@ -121,11 +146,6 @@ spec:
 
                         liquibase changeLogSync \
                         --changeLogFile=sample.sql \
-                        --url="{{inputs.parameters.db_uri}}" \
-                        --username="{{inputs.parameters.user}}" \
-                        --password="${HOST_PASSWORD}";
-
-                        liquibase releaseLocks \
                         --url="{{inputs.parameters.db_uri}}" \
                         --username="{{inputs.parameters.user}}" \
                         --password="${HOST_PASSWORD}";
