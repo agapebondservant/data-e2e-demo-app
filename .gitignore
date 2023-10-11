@@ -20,3 +20,7 @@ demo-ml/resources/gpdemo.pem
 training-db-secret.yaml
 inference-db-secret.yaml
 credit_card_resampled.csv
+deploy/templates/demo-minio/minio-http-proxy.yaml
+deploy/templates/demo-minio/openssl.conf
+./deploy/templates/demo-minio/openssl.conf
+./deploy/templates/demo-minio/minio-http-proxy.yaml
