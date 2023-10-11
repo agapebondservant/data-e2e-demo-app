@@ -20,6 +20,10 @@ kubectl wait --for=condition=Ready pod -l app=minio -n ${MINIO_BUCKET_NAMESPACE}
 
 sleep 5
 
+kubectl apply -f deploy/templates/demo-minio/minio-secret-exporter.yaml -n ${MINIO_BUCKET_NAMESPACE}
+
+kubectl apply -f deploy/templates/demo-minio/minio-secret-importer.yaml -n argo
+
 mc config host add --insecure data-e2e-minio-argo http://${ARGO_S3_ENDPOINT_FQDN} ${MINIO_ARGO_ACCESS_KEY_ID} ${MINIO_ARGO_SECRET_ACCESS_KEY}
 
 mc mb --insecure -p data-e2e-minio-argo/demo && mc policy --insecure set public data-e2e-minio-argo/demo

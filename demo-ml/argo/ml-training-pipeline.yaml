@@ -62,6 +62,25 @@ spec:
               value: #@ data.values.training_db_schema
             - name: shell_script
               value: #@ data.values.training_db_shell_script
+            - name: shared_argo_artifact_server
+              value: #@ data.values.shared_argo_artifact_server
+            - name: shared_argo_artifact_server_bucket
+              value: #@ data.values.shared_argo_artifact_server_bucket
+        outputs:
+          artifacts:
+            - name: training-output
+              path: changelog/sample.sql
+              s3:
+                endpoint: "{{inputs.parameters.shared_argo_artifact_server}}"
+                insecure: true
+                bucket: "{{inputs.parameters.shared_argo_artifact_server_bucket}}"
+                key: anomaly-detection/sample.tgz
+                accessKeySecret:
+                  name: minio
+                  key: accesskey
+                secretKeySecret:
+                  name: minio
+                  key: secretkey
 
         script:
           image: liquibase/liquibase
@@ -89,6 +108,14 @@ spec:
             --url="{{inputs.parameters.db_uri}}" \
             --username="{{inputs.parameters.user}}" --password="${HOST_PASSWORD}" \
             --sql="SELECT run_random_forest_training()";
+
+            liquibase generateChangeLog \
+            --logLevel=INFO \
+            --changeLogFile=changelog/sample.sql \
+            --url="{{inputs.parameters.db_uri}}" \
+            --username="{{inputs.parameters.user}}" --password="${HOST_PASSWORD}" --diff-types="data" \
+            --overwrite-output-file=true \
+            --include-objects="rf_credit_card_transactions_importances, rf_credit_card_transactions_inference_results, rf_credit_card_transactions_model, rf_credit_card_transactions_model_group, rf_credit_card_transactions_model_summary, rf_model_versions";
 
             liquibase releaseLocks \
             --url="{{inputs.parameters.db_uri}}" \

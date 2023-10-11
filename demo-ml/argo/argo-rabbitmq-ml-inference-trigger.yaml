@@ -47,6 +47,19 @@ spec:
                             repo: #@ data.values.git_repo
                             singleBranch: true
                             branch: #@ data.values.environment_name
+                        - name: training-input
+                          path: /liquibase/sample.sql
+                          s3:
+                            endpoint: "{{inputs.parameters.shared_argo_artifact_server}}"
+                            insecure: true
+                            bucket: "{{inputs.parameters.shared_argo_artifact_server_bucket}}"
+                            key: anomaly-detection/sample.tgz
+                            accessKeySecret:
+                              name: minio
+                              key: accesskey
+                            secretKeySecret:
+                              name: minio
+                              key: secretkey
                       parameters:
                         - name: user
                           value: #@ data.values.inference_user
@@ -64,20 +77,16 @@ spec:
                           value: #@ data.values.environment_name
                         - name: script_shared_path
                           value: #@ data.values.script_shared_path
-                        - name: source_user
-                          value: #@ data.values.training_user
-                        - name: source_db_uri
-                          value: #@ data.values.training_db_uri
-                        - name: source_external_secret_ref
-                          value: #@ data.values.training_external_secret_ref
-                        - name: source_external_secret_ref_key
-                          value: #@ data.values.training_external_secret_ref_key
                         - name: db_script
                           value: #@ data.values.inference_db_script
                         - name: db_schema
                           value: #@ data.values.inference_db_schema
                         - name: shell_script
                           value: #@ data.values.inference_db_shell_script
+                        - name: shared_argo_artifact_server
+                          value: #@ data.values.shared_argo_artifact_server
+                        - name: shared_argo_artifact_server_bucket
+                          value: #@ data.values.shared_argo_artifact_server_bucket
                     script:
                       image: liquibase/liquibase
                       env:
@@ -86,11 +95,6 @@ spec:
                             secretKeyRef:
                               name: "{{inputs.parameters.external_secret_ref}}"
                               key: "{{inputs.parameters.external_secret_ref_key}}"
-                        - name: SOURCE_HOST_PASSWORD
-                          valueFrom:
-                            secretKeyRef:
-                              name: "{{inputs.parameters.source_external_secret_ref}}"
-                              key: "{{inputs.parameters.source_external_secret_ref_key}}"
                       command: [ bash ]
                       source: |
                         DB_SCHEMA="{{inputs.parameters.db_schema}}" \
@@ -104,27 +108,19 @@ spec:
                         --username="{{inputs.parameters.user}}" \
                         --password="${HOST_PASSWORD}";
 
-                        liquibase generateChangeLog \
-                        --logLevel=INFO \
-                        --changeLogFile=changelog/sample.sql \
-                        --url="{{inputs.parameters.source_db_uri}}" \
-                        --username="{{inputs.parameters.source_user}}" --password="${SOURCE_HOST_PASSWORD}" --diff-types="data" \
-                        --overwrite-output-file=true \
-                        --include-objects="rf_credit_card_transactions_importances, rf_credit_card_transactions_inference_results, rf_credit_card_transactions_model, rf_credit_card_transactions_model_group, rf_credit_card_transactions_model_summary, rf_model_versions";
-
                         liquibase execute-sql \
                         --url="{{inputs.parameters.db_uri}}" \
                         --username="{{inputs.parameters.user}}" --password="${HOST_PASSWORD}" \
                         --sql="TRUNCATE TABLE rf_credit_card_transactions_importances; TRUNCATE TABLE rf_credit_card_transactions_inference_results; TRUNCATE TABLE rf_credit_card_transactions_model; TRUNCATE TABLE rf_credit_card_transactions_model_group; TRUNCATE TABLE rf_credit_card_transactions_model_summary;";
 
                         liquibase update \
-                        --changeLogFile=changelog/sample.sql \
+                        --changeLogFile=sample.sql \
                         --url="{{inputs.parameters.db_uri}}" \
                         --username="{{inputs.parameters.user}}" \
                         --password="${HOST_PASSWORD}";
 
                         liquibase changeLogSync \
-                        --changeLogFile=changelog/sample.sql \
+                        --changeLogFile=sample.sql \
                         --url="{{inputs.parameters.db_uri}}" \
                         --username="{{inputs.parameters.user}}" \
                         --password="${HOST_PASSWORD}";
