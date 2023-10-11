@@ -31,7 +31,7 @@ spec:
                 entrypoint: train
                 synchronization:
                   mutex:
-                    name: workflow
+                    name: fraud-detection
                 templates:
                   - name: train
                     steps:
