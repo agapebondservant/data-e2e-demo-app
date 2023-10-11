@@ -232,8 +232,8 @@ exit
 
 2. Generate a resampled version of the imported data above:
 ```
-pip install -U demo-ml/resources/requirements.txt
-python demo-ml/resources/resample_dataset.py
+pip install -U demo-ml/jobs/requirements.txt
+python demo-ml/jobs/resample_dataset.py
 ```
 
 3. The script above will generate a CSV file with the resampled data (_credit_card_resampled.csv_). 
