@@ -19,7 +19,7 @@ spec:
               apiVersion: argoproj.io/v1alpha1
               kind: Workflow
               metadata:
-                name: random-forest-deploy-inference-workflow
+                generateName: random-forest-deploy-inference-workflow-
                 annotations:
                   kapp.k14s.io/versioned: ""
                   kapp.k14s.io/nonce: ""
@@ -29,6 +29,9 @@ spec:
                   runAsUser: 1000
                   fsGroup: 1000
                 entrypoint: train
+                synchronization:
+                  mutex:
+                    name: workflow
                 templates:
                   - name: train
                     steps:
