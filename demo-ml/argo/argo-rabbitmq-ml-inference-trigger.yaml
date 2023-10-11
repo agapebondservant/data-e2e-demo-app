@@ -12,20 +12,26 @@ spec:
   triggers:
     - template:
         name: amqp-workflow-trigger
-        argoWorkflow:
-          operation: submit
+        k8s:
+          operation: create
           source:
             resource:
               apiVersion: argoproj.io/v1alpha1
               kind: Workflow
               metadata:
-                name: random-forest-deploy-inference-workflow
+                generateName: random-forest-deploy-inference-workflow-
                 annotations:
                   kapp.k14s.io/versioned: ""
                   kapp.k14s.io/nonce: ""
                   kapp.k14s.io/disable-wait: ""
               spec:
+                securityContext:
+                  runAsUser: 1000
+                  fsGroup: 1000
                 entrypoint: train
+                synchronization:
+                  mutex:
+                    name: workflow
                 templates:
                   - name: train
                     steps:
@@ -66,6 +72,12 @@ spec:
                           value: #@ data.values.training_external_secret_ref
                         - name: source_external_secret_ref_key
                           value: #@ data.values.training_external_secret_ref_key
+                        - name: db_script
+                          value: #@ data.values.inference_db_script
+                        - name: db_schema
+                          value: #@ data.values.inference_db_schema
+                        - name: shell_script
+                          value: #@ data.values.inference_db_shell_script
                     script:
                       image: liquibase/liquibase
                       env:
@@ -81,8 +93,20 @@ spec:
                               key: "{{inputs.parameters.source_external_secret_ref_key}}"
                       command: [ bash ]
                       source: |
+                        DB_SCHEMA="{{inputs.parameters.db_schema}}" \
+                        SHARED_PATH="{{inputs.parameters.script_shared_path}}" \
+                        DB_SCRIPT="{{inputs.parameters.db_script}}" \
+                        "{{inputs.parameters.script_shared_path}}"/"{{inputs.parameters.shell_script}}";
+
+                        liquibase update \
+                        --changelog-file=changelog/"{{inputs.parameters.db_script}}" \
+                        --url="{{inputs.parameters.db_uri}}" \
+                        --username="{{inputs.parameters.user}}" \
+                        --password="${HOST_PASSWORD}";
+
                         liquibase generateChangeLog \
-                        --changeLogFile="sample.sql" \
+                        --logLevel=INFO \
+                        --changeLogFile=changelog/sample.sql \
                         --url="{{inputs.parameters.source_db_uri}}" \
                         --username="{{inputs.parameters.source_user}}" --password="${SOURCE_HOST_PASSWORD}" --diff-types="data" \
                         --overwrite-output-file=true \
@@ -91,16 +115,21 @@ spec:
                         liquibase execute-sql \
                         --url="{{inputs.parameters.db_uri}}" \
                         --username="{{inputs.parameters.user}}" --password="${HOST_PASSWORD}" \
-                        --sql="UPDATE databasechangeloglock SET LOCKED=0::boolean, LOCKGRANTED=null, LOCKEDBY=null where ID=1; TRUNCATE TABLE rf_credit_card_transactions_importances; TRUNCATE TABLE rf_credit_card_transactions_inference_results; TRUNCATE TABLE rf_credit_card_transactions_model; TRUNCATE TABLE rf_credit_card_transactions_model_group; TRUNCATE TABLE rf_credit_card_transactions_model_summary;";
+                        --sql="TRUNCATE TABLE rf_credit_card_transactions_importances; TRUNCATE TABLE rf_credit_card_transactions_inference_results; TRUNCATE TABLE rf_credit_card_transactions_model; TRUNCATE TABLE rf_credit_card_transactions_model_group; TRUNCATE TABLE rf_credit_card_transactions_model_summary;";
 
                         liquibase update \
-                        --changelog-file="sample.sql" \
+                        --changeLogFile=changelog/sample.sql \
                         --url="{{inputs.parameters.db_uri}}" \
                         --username="{{inputs.parameters.user}}" \
                         --password="${HOST_PASSWORD}";
 
                         liquibase changeLogSync \
-                        --changelog-file="sample.sql" \
+                        --changeLogFile=changelog/sample.sql \
+                        --url="{{inputs.parameters.db_uri}}" \
+                        --username="{{inputs.parameters.user}}" \
+                        --password="${HOST_PASSWORD}";
+
+                        liquibase releaseLocks \
                         --url="{{inputs.parameters.db_uri}}" \
                         --username="{{inputs.parameters.user}}" \
                         --password="${HOST_PASSWORD}";

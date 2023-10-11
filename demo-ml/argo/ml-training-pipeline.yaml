@@ -13,6 +13,9 @@ spec:
   concurrencyPolicy: "Forbid"
   startingDeadlineSeconds: 0
   workflowSpec:
+    securityContext:
+      runAsUser: 1000
+      fsGroup: 1000
     entrypoint: train
     templates:
       - name: train
@@ -53,6 +56,13 @@ spec:
               value: #@ data.values.environment_name
             - name: script_shared_path
               value: #@ data.values.script_shared_path
+            - name: db_script
+              value: #@ data.values.training_db_script
+            - name: db_schema
+              value: #@ data.values.training_db_schema
+            - name: shell_script
+              value: #@ data.values.training_db_shell_script
+
         script:
           image: liquibase/liquibase
           mirrorVolumeMounts: true
@@ -64,10 +74,26 @@ spec:
                   key: "{{inputs.parameters.external_secret_ref_key}}"
           command: [bash]
           source: |
-            liquibase execute-sql \
+            DB_SCHEMA="{{inputs.parameters.db_schema}}" \
+            SHARED_PATH="{{inputs.parameters.script_shared_path}}" \
+            DB_SCRIPT="{{inputs.parameters.db_script}}" \
+            "{{inputs.parameters.script_shared_path}}"/"{{inputs.parameters.shell_script}}";
+
+            liquibase update \
+            --changelog-file=changelog/"{{inputs.parameters.db_script}}" \
+            --url="{{inputs.parameters.db_uri}}" \
+            --username="{{inputs.parameters.user}}" \
+            --password="${HOST_PASSWORD}";
+
+            liquibase executeSql \
             --url="{{inputs.parameters.db_uri}}" \
             --username="{{inputs.parameters.user}}" --password="${HOST_PASSWORD}" \
-            --sql="UPDATE databasechangeloglock SET LOCKED=0::boolean, LOCKGRANTED=null, LOCKEDBY=null where ID=1; SELECT run_random_forest_training()";
+            --sql="SELECT run_random_forest_training()";
+
+            liquibase releaseLocks \
+            --url="{{inputs.parameters.db_uri}}" \
+            --username="{{inputs.parameters.user}}" \
+            --password="${HOST_PASSWORD}";
 
 
       - name: run-training
@@ -83,6 +109,9 @@ spec:
         container:
           image: oawofolu/demo-ml-base
           command: [ python ]
+          securityContext:
+            runAsUser: 0
+            fsGroup: 1000
           env:
             - name: rmq_user
               valueFrom:

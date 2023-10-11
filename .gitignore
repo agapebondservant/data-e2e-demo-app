@@ -1,6 +1,5 @@
 .env
 tmp.json
-values.yaml
 /deploy/templates/demo-ui/deployment.yml
 /deploy/templates/demo-data/rabbitmq-operator-packagerepository.yaml
 ./deploy/templates/demo-data/rabbitmq-operator-packagerepository.yaml
