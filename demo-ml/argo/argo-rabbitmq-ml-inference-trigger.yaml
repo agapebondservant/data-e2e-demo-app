@@ -161,12 +161,13 @@ spec:
                         --username="{{inputs.parameters.user}}" --password="${HOST_PASSWORD}" \
                         --sql="SELECT 'start'";
 
-                        liquibase tag --tag={{inputs.parameters.git_sha}} \
+                        liquibase tag --tag="{{inputs.parameters.git_repo}}/commit/{{inputs.parameters.git_sha}}" \
                         --url="{{inputs.parameters.db_uri}}" \
                         --username="{{inputs.parameters.user}}" \
                         --password="${HOST_PASSWORD}";
 
                         liquibase update \
+                        --logLevel=INFO \
                         --changelog-file=changelog/"{{inputs.parameters.db_script}}" \
                         --url="{{inputs.parameters.db_uri}}" \
                         --username="{{inputs.parameters.user}}" \
@@ -178,6 +179,7 @@ spec:
                         --sql="TRUNCATE TABLE rf_credit_card_transactions_importances; TRUNCATE TABLE rf_credit_card_transactions_inference_results; TRUNCATE TABLE rf_credit_card_transactions_model; TRUNCATE TABLE rf_credit_card_transactions_model_group; TRUNCATE TABLE rf_credit_card_transactions_model_summary;";
 
                         liquibase update \
+                        --logLevel=INFO \
                         --changeLogFile=sample.sql \
                         --url="{{inputs.parameters.db_uri}}" \
                         --username="{{inputs.parameters.user}}" \
