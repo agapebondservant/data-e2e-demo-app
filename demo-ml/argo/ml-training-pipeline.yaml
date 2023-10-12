@@ -21,14 +21,38 @@ spec:
     templates:
       - name: train
         steps:
+          - - name: fetch-git-revision
+              template: fetch-git-metadata
           - - name: run-training
               template: deploy-training-db
+              arguments:
+                parameters:
+                  - name: git_sha
+                    value: "{{steps.fetch-git-revision.outputs.result}}"
           - - name: publish-model
               template: run-training
               arguments:
                 parameters:
                   - name: entrypoint
                     value: "./app/publish_randomforest_model.py"
+
+      - name: fetch-git-metadata
+        inputs:
+          artifacts:
+            - name: git-rev
+              path: /tmp
+              git:
+                repo: #@ data.values.git_repo
+                singleBranch: true
+                branch: #@ data.values.environment_name
+        container:
+          image: golang
+          command: [sh, -c]
+          securityContext:
+            runAsUser: 0
+            fsGroup: 1000
+          args: ["git config --global --add safe.directory /tmp; git rev-parse --short HEAD;"]
+          workingDir: /tmp
 
       - name: exit-handler
         inputs:
@@ -37,6 +61,10 @@ spec:
               value: #@ data.values.training_user
             - name: db_uri
               value: #@ data.values.training_db_uri
+            - name: external_secret_ref
+              value: #@ data.values.training_external_secret_ref
+            - name: external_secret_ref_key
+              value: #@ data.values.training_external_secret_ref_key
         script:
           image: liquibase/liquibase
           env:
@@ -88,6 +116,7 @@ spec:
               value: #@ data.values.shared_argo_artifact_server
             - name: shared_argo_artifact_server_bucket
               value: #@ data.values.shared_argo_artifact_server_bucket
+            - name: git_sha
         outputs:
           artifacts:
             - name: training-output
@@ -121,6 +150,16 @@ spec:
             SHARED_PATH="{{inputs.parameters.script_shared_path}}" \
             DB_SCRIPT="{{inputs.parameters.db_script}}" \
             "{{inputs.parameters.script_shared_path}}"/"{{inputs.parameters.shell_script}}";
+
+            liquibase executeSql \
+            --url="{{inputs.parameters.db_uri}}" \
+            --username="{{inputs.parameters.user}}" --password="${HOST_PASSWORD}" \
+            --sql="SELECT 'start'";
+
+            liquibase tag --tag={{inputs.parameters.git_sha}} \
+            --url="{{inputs.parameters.db_uri}}" \
+            --username="{{inputs.parameters.user}}" \
+            --password="${HOST_PASSWORD}";
 
             liquibase update \
             --changelog-file=changelog/"{{inputs.parameters.db_script}}" \
