@@ -8,7 +8,8 @@ CREATE OR REPLACE FUNCTION hyperparams(code text)
 RETURNS INTEGER
 AS $BODY$
     SELECT current_setting('hyperparams.' || code)::integer;
-$BODY$;
+$BODY$
+LANGUAGE plpgsql;
 COMMENT ON FUNCTION hyperparams(code text)
 IS 'Global holding place for setting and retrieving model hyperparameters';
 
