@@ -7,7 +7,9 @@ DROP FUNCTION IF EXISTS hyperparams();
 CREATE OR REPLACE FUNCTION hyperparams(code text)
 RETURNS INTEGER
 AS $BODY$
-    SELECT current_setting('hyperparams.' || code)::integer;
+BEGIN
+    RETURN (SELECT current_setting('hyperparams.' || code)::integer);
+END;
 $BODY$
 LANGUAGE plpgsql;
 COMMENT ON FUNCTION hyperparams(code text)
