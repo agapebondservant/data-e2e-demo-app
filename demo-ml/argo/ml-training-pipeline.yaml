@@ -102,6 +102,8 @@ spec:
               value: #@ data.values.training_external_secret_ref_key
             - name: git_repo
               value: #@ data.values.git_repo
+            - name: git_repo_prefix
+              value: #@ data.values.git_repo.replace(".git","")
             - name: environment_name
               value: #@ data.values.environment_name
             - name: script_shared_path
@@ -163,7 +165,7 @@ spec:
             --username="{{inputs.parameters.user}}" --password="${HOST_PASSWORD}" \
             --sql="SELECT 'start'";
 
-            liquibase tag --tag="{{inputs.parameters.git_repo}}/commit/{{inputs.parameters.git_sha}}" \
+            liquibase tag --tag="{{inputs.parameters.git_repo_prefix}}/commit/{{inputs.parameters.git_sha}}" \
             --url="{{inputs.parameters.db_uri}}" \
             --username="{{inputs.parameters.user}}" \
             --password="${HOST_PASSWORD}";
