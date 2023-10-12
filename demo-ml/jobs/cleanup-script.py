@@ -43,7 +43,7 @@ print("Cleaning up training database...")
 subprocess.run(
     f'psql {os.path.expandvars("${PSQL_CONNECT_STR}")} -c "UPDATE DATABASECHANGELOGLOCK SET LOCKED=0::boolean, LOCKGRANTED=null, LOCKEDBY=null where ID=1;"; ' +
     f'psql {os.path.expandvars("${PSQL_CONNECT_STR}")} -c "TRUNCATE TABLE rf_model_versions ; TRUNCATE TABLE rf_credit_card_transactions_model_evaluations;"; ' +
-    f'psql {os.path.expandvars("${PSQL_CONNECT_STR}")} -c "DO \\$\\$ DECLARE s text; BEGIN FOR s IN SELECT nspname FROM pg_namespace WHERE nspname LIKE \'m1\\_%\' LOOP EXECUTE \'DROP SCHEMA "\' || quote_ident(s) || \'" CASCADE\'; END LOOP; END;\\$\\$;"; ',
+    f'psql {os.path.expandvars("${PSQL_CONNECT_STR}")} -c "DO \\$\\$ DECLARE s text; BEGIN FOR s IN SELECT nspname FROM pg_namespace WHERE nspname LIKE \'m1%\' LOOP EXECUTE \'DROP SCHEMA \' || quote_ident(s) || \' CASCADE\'; END LOOP; END;\\$\\$;"; ',
     shell=True
 )
 print("Database cleanup complete.")
