@@ -8,7 +8,7 @@ CREATE OR REPLACE FUNCTION hyperparams(code text)
 RETURNS INTEGER
 AS $BODY$
 BEGIN
-    SELECT current_setting('hyperparams.' || code)::integer;
+    RETURN (SELECT current_setting('hyperparams.' || code)::integer);
 END;
 $BODY$
 LANGUAGE plpgsql;
