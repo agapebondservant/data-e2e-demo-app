@@ -161,7 +161,7 @@ spec:
                         --username="{{inputs.parameters.user}}" --password="${HOST_PASSWORD}" \
                         --sql="SELECT 'start'";
 
-                        liquibase tag --tag={{inputs.parameters.git_sha}} \
+                        liquibase tag --tag="{{inputs.parameters.git_repo}}/commit/{{inputs.parameters.git_sha}}" \
                         --url="{{inputs.parameters.db_uri}}" \
                         --username="{{inputs.parameters.user}}" \
                         --password="${HOST_PASSWORD}";
