@@ -116,6 +116,8 @@ spec:
               value: #@ data.values.shared_argo_artifact_server
             - name: shared_argo_artifact_server_bucket
               value: #@ data.values.shared_argo_artifact_server_bucket
+            - name: hyperparameters_script
+              value: #@ data.values.training_hyperparameters_db_script
             - name: git_sha
         outputs:
           artifacts:
@@ -148,6 +150,11 @@ spec:
 
             DB_SCHEMA="{{inputs.parameters.db_schema}}" \
             SHARED_PATH="{{inputs.parameters.script_shared_path}}" \
+            DB_SCRIPT="{{inputs.parameters.hyperparameters_script}}" \
+            "{{inputs.parameters.script_shared_path}}"/"{{inputs.parameters.shell_script}}";
+
+            DB_SCHEMA="{{inputs.parameters.db_schema}}" \
+            SHARED_PATH="{{inputs.parameters.script_shared_path}}" \
             DB_SCRIPT="{{inputs.parameters.db_script}}" \
             "{{inputs.parameters.script_shared_path}}"/"{{inputs.parameters.shell_script}}";
 
@@ -157,6 +164,12 @@ spec:
             --sql="SELECT 'start'";
 
             liquibase tag --tag={{inputs.parameters.git_sha}} \
+            --url="{{inputs.parameters.db_uri}}" \
+            --username="{{inputs.parameters.user}}" \
+            --password="${HOST_PASSWORD}";
+
+            liquibase update \
+            --changelog-file=changelog/"{{inputs.parameters.hyperparameters_script}}" \
             --url="{{inputs.parameters.db_uri}}" \
             --username="{{inputs.parameters.user}}" \
             --password="${HOST_PASSWORD}";

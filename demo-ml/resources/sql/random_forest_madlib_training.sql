@@ -109,14 +109,14 @@ BEGIN
 	                           'time_elapsed, amt, lat, long',   -- features
 	                           NULL,              -- exclude columns
 	                           NULL,              -- grouping columns
-	                           3::integer,       -- number of trees
-	                           2::integer,        -- number of random features
+	                           hyperparams('random_forest_num_trees'),       -- number of trees
+	                           hyperparams('random_forest_num_random_features'),        -- number of random features
 	                           TRUE::boolean,     -- variable importance
-	                           1::integer,        -- num_permutations
-	                           8::integer,        -- max depth
-	                           3::integer,        -- min split
-	                           1::integer,        -- min bucket
-	                           10::integer        -- number of splits per continuous variable
+	                           hyperparams('random_forest_num_permutations'),        -- num_permutations
+	                           hyperparams('random_forest_max_depth'),        -- max depth
+	                           hyperparams('random_forest_min_split'),        -- min split
+	                           hyperparams('random_forest_min_bucket'),        -- min bucket
+	                           hyperparams('random_forest_num_splits_per_continuous_var')        -- number of splits per continuous variable
 	                           );
 
 

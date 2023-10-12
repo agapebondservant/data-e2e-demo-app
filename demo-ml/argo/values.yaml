@@ -15,6 +15,7 @@ shared_argo_artifact_server_bucket: demo
 
 training_shared_path: /usr/local/greenplum-db/bin/plcontainer_clients
 training_db_script: demo-ml/resources/sql/random_forest_madlib_training.sql
+training_hyperparameters_db_script: demo-ml/resources/sql/hyperparameters.sql
 training_code_shell_script: demo-ml/resources/shell/deploy_training_code.sh
 training_db_shell_script: demo-ml/resources/shell/deploy_training_db.sh
 training_user: gpadmin
