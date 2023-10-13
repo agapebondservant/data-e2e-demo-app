@@ -202,10 +202,40 @@ spec:
             - name: entrypoint
             - name: model_name
               value: 'model'
+            - name: mlflow_tracking_uri
+              value: #@ data.values.mlflow_tracking_uri
+            - name: mlflow_s3_uri
+              value: #@ data.values.mlflow_s3_uri
+            - name: datahub_rest_uri
+              value: #@ data.values.datahub_rest_uri
+            - name: training_user
+              value: #@ data.values.training_user
+            - name: training_master
+              value: #@ data.values.training_master
+            - name: training_db_name
+              value: #@ data.values.training_db_name
+            - name: inference_user
+              value: #@ data.values.inference_user
+            - name: inference_host
+              value: #@ data.values.inference_host
+            - name: inference_db_name
+              value: #@ data.values.inference_db_name
+            - name: training_external_secret_ref
+              value: #@ data.values.training_external_secret_ref
+            - name: training_external_secret_ref_key
+              value: #@ data.values.training_external_secret_ref_key
+            - name: inference_external_secret_ref
+              value: #@ data.values.inference_external_secret_ref
+            - name: inference_external_secret_ref_key
+              value: #@ data.values.inference_external_secret_ref_key
             - name: shared_rabbit_secret
               value: #@ data.values.shared_rabbit_secret
             - name: shared_rabbit_host
               value: #@ data.values.shared_rabbit_host
+            - name: shared_argo_events_amqp_exchange
+              value: #@ data.values.shared_argo_events_amqp_exchange
+            - name: shared_argo_events_amqp_routing_key
+              value: #@ data.values.shared_argo_events_amqp_routing_key
         container:
           image: oawofolu/demo-ml-base
           command: [ python ]
@@ -213,6 +243,38 @@ spec:
             runAsUser: 0
             fsGroup: 1000
           env:
+            - name: MLFLOW_TRACKING_URI
+              value: "{{inputs.parameters.mlflow_tracking_uri}}"
+            - name: MLFLOW_S3_ENDPOINT_URL
+              value: "{{inputs.parameters.mlflow_s3_uri}}"
+            - name: datahub_rest_uri
+              value: "{{inputs.parameters.datahub_rest_uri}}"
+            - name: training_user
+              value: "{{inputs.parameters.training_user}}"
+            - name: training_master
+              value: "{{inputs.parameters.training_master}}"
+            - name: training_db_name
+              value: "{{inputs.parameters.training_db_name}}"
+            - name: inference_user
+              value: "{{inputs.parameters.inference_user}}"
+            - name: inference_host
+              value: "{{inputs.parameters.inference_host}}"
+            - name: inference_db_name
+              value: "{{inputs.parameters.inference_db_name}}"
+            - name: training_password
+              valueFrom:
+                secretKeyRef:
+                  name: "{{inputs.parameters.training_external_secret_ref}}"
+                  key: "{{inputs.parameters.training_external_secret_ref_key}}"
+            - name: inference_password
+              valueFrom:
+                secretKeyRef:
+                  name: "{{inputs.parameters.inference_external_secret_ref}}"
+                  key: "{{inputs.parameters.inference_external_secret_ref_key}}"
+            - name: training_db_uri_full
+              value: postgresql://"{{inputs.parameters.training_user}}":$training_password@"{{inputs.parameters.training_master}}"/"{{inputs.parameters.training_db_name}}"?sslmode=require
+            - name: inference_db_uri_full
+              value: postgresql://"{{inputs.parameters.inference_user}}":$inference_password@"{{inputs.parameters.inference_host}}"/"{{inputs.parameters.inference_db_name}}"
             - name: rmq_user
               valueFrom:
                 secretKeyRef:
@@ -225,6 +287,9 @@ spec:
                   key: password
             - name: rmq_host
               value: "{{inputs.parameters.shared_rabbit_host}}"
+            - name: rmq_exchange
+              value: "{{inputs.parameters.shared_argo_events_amqp_exchange}}"
+            - name: rmq_routing_key
+              value: "{{inputs.parameters.shared_argo_events_amqp_routing_key}}"
           args:
             - "{{inputs.parameters.entrypoint}}"
-

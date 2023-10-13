@@ -8,10 +8,14 @@ script_shared_path: /liquibase/changelog
 mlpipeline_git_repo: https://github.com/agapebondservant/data-e2e-demo-app.git
 pyfunction_vendored_dependencies_uri: https://tolatest-temp-resources.s3.us-east-2.amazonaws.com/vendor2.tar.gz
 mlflow_s3_uri: http://minio-ml.tanzudatatap.com
+mlflow_tracking_uri: http://mlflow.tanzudatatap.com
+datahub_rest_uri: datahub-gms-datahub.tanzudatatap.com
 shared_rabbit_secret: rmqanomaly-default-user
 shared_rabbit_host: a1fb9dcb4d9f948cd87a3ef745004bf1-1827317288.us-east-1.elb.amazonaws.com
 shared_argo_artifact_server: minio-argo.tanzudatatap.com
 shared_argo_artifact_server_bucket: demo
+shared_argo_events_amqp_exchange: mds-fraud-transactions-exchange-global
+shared_argo_events_amqp_routing_key: downstream.randomforest.madlib
 
 training_shared_path: /usr/local/greenplum-db/bin/plcontainer_clients
 training_db_script: demo-ml/resources/sql/random_forest_madlib_training.sql
@@ -30,7 +34,6 @@ training_db_uri: jdbc:postgresql://44.201.91.88:5432/dev?sslmode=require&prepare
 inference_user: postgres
 inference_host: aa28023c2f2614eb188934e99167ce65-1434640867.us-east-1.elb.amazonaws.com
 inference_db_name: postgres
-mlflow_tracking_uri: http://mlflow.tanzudatatap.com
 inference_shared_path: /usr/local
 inference_db_script: demo-ml/resources/sql/random_forest_madlib_inference.sql
 inference_code_shell_script: demo-ml/resources/shell/deploy_inference_code.sh
