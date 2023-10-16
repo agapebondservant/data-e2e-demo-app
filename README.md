@@ -42,6 +42,7 @@ tanzu acc create realtime-analytics-acc --git-repository https://github.com/agap
 - [ ] values.yaml files (must create `deploy/templates/demo-ui/values.yaml` and `deploy/templates/demo-data/values.yaml`; use values-template.yaml as a guide)
 - [ ] psql client
 - [ ] Spring Cloud Data Flow
+- [ ] DataHub
 
 2. Prepare manifest files:
 ```

@@ -44,3 +44,4 @@ inference_namespace: default
 inference_db_schema: public
 inference_image: alpine/k8s:1.23.17
 inference_db_uri: jdbc:postgresql://aa28023c2f2614eb188934e99167ce65-1434640867.us-east-1.elb.amazonaws.com:5432/postgres?prepareThreshold=0
+inference_cache_gemfire_server: http://gfanomaly-server.tanzudatatap.com
