@@ -71,6 +71,11 @@ kubectl apply -f demo-ml/argo/install-argo-events-validatinghook.yaml
 deploy/templates/scripts/deploy-argo-minio-server.sh
 ```
 
+6. Deploy additional secrets:
+```
+deploy/templates/scripts/deploy-additional-secrets.sh
+```
+
 ### Set up Gemfire and RabbitMQ <a name=gemfire-and-rabbit>
 1. Create target namespace for backing services:
 ```

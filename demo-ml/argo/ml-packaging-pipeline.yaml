@@ -1,0 +1,133 @@
+#@ load("@ytt:data", "data")
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: random-forest-package-workflow
+  annotations:
+    kapp.k14s.io/versioned: ""
+    kapp.k14s.io/nonce: ""
+    kapp.k14s.io/disable-wait: ""
+spec:
+  entrypoint: train
+  securityContext:
+    runAsUser: 1000
+    fsGroup: 1000
+  synchronization:
+    mutex:
+      name: fraud-detection-package
+  volumeClaimTemplates:
+    - metadata:
+        name: workdir
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 1Gi
+  templates:
+    - name: train
+      steps:
+        - - name: fetch-artifacts
+            template: fetch-artifacts
+        - - name: build-onnx-jars
+            template: build-onnx-jars
+        - - name: build-onnx-image
+            template: build-onnx-image
+
+    - name: fetch-artifacts
+      inputs:
+        parameters:
+          - name: onnx_gemfire_cluster_template
+            value: #@ data.values.onnx_gemfire_cluster_template
+        artifacts:
+          - name: ml-artifacts
+            path: /tmp
+            git:
+              repo: #@ data.values.mlpipeline_git_repo
+              singleBranch: true
+              branch: #@ data.values.environment_name
+      script:
+        image: oawofolu/mlflow-image:2.7.0
+        command: [bash]
+        env:
+          - name: MLFLOW_TRACKING_URI
+            value: #@ data.values.mlflow_tracking_uri
+          - name: ARTIFACT_DESTINATION
+            value: /opt
+        securityContext:
+          runAsUser: 0
+          fsGroup: 1000
+        workingDir: /tmp
+        volumeMounts:
+          - name: workdir
+            mountPath: /opt
+        source: |
+          set -e;
+          cp "{{inputs.parameters.onnx_gemfire_cluster_template}}" /opt;
+          python demo-ml/jobs/fetch_artifacts.py;
+
+    - name: build-onnx-jars
+      inputs:
+        artifacts:
+          - name: onnx-packaging-code
+            path: /tmp
+            git:
+              repo: #@ data.values.onnxpackaging_git_repo
+              singleBranch: true
+              branch: #@ data.values.environment_name
+      script:
+        image: #@ data.values.jdk_image
+        workingDir: /tmp
+        volumeMounts:
+          - name: workdir
+            mountPath: /opt
+        command: [bash]
+        source: |
+          set -e;
+          ls -ltr /opt;
+          cd java/onnxinference;
+          envsubst < settings.xml.template > settings.xml;
+          ./mvnw clean package -f pom-onnx.xml -s settings.xml;
+          cp target/*.jar /opt;
+          ./mvnw clean package -f pom-gemfire.xml -s settings.xml;
+          cp target/*.jar /opt;
+
+    - name: build-onnx-image
+      volumes:
+        - name: docker-config
+          secret:
+            secretName: #@ data.values.docker_buildkit_secret_name
+      inputs:
+        artifacts:
+          - name: onnx-packaging-code
+            path: /tmp
+            git:
+              repo: #@ data.values.onnxpackaging_git_repo
+              singleBranch: true
+              branch: #@ data.values.environment_name
+        parameters:
+          - name: onnx_image
+            value: #@ data.values.onnx_java_target_image
+      container:
+        image: moby/buildkit:master
+        command: [ buildctl-daemonless.sh ]
+        readinessProbe:
+          exec:
+            command: [ sh, -c, "buildctl debug workers" ]
+        env:
+          - name: DOCKER_CONFIG
+            value: /.docker
+        volumeMounts:
+          - name: workdir
+            mountPath: /opt
+          - name: docker-config
+            mountPath: /.docker
+        securityContext:
+          runAsUser: 0
+          fsGroup: 1000
+        args:
+          - build
+          - --frontend dockerfile.v0
+          - --local context=/opt
+          - --local dockerfile=/tmp/deploy/templates/dockerfiles/onnx-gemfire
+          - --output type=image,name=docker.io/"{{inputs.parameters.onnx_image}}",push=true

@@ -24,3 +24,10 @@ deploy/templates/demo-minio/minio-http-proxy.yaml
 deploy/templates/demo-minio/openssl.conf
 ./deploy/templates/demo-minio/openssl.conf
 ./deploy/templates/demo-minio/minio-http-proxy.yaml
+Dockerfile-mlflow
+tmp/
+tmp.txt
+tmp.yaml
+testjob.yaml
+Dockerfile-tmp
+deploy/templates/demo-data/values.yaml
