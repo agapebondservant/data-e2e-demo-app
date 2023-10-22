@@ -23,7 +23,7 @@ spec:
         accessModes: [ "ReadWriteOnce" ]
         resources:
           requests:
-            storage: 1Gi
+            storage: 4Gi
   templates:
     - name: train
       steps:
@@ -48,6 +48,7 @@ spec:
               branch: #@ data.values.environment_name
       script:
         image: oawofolu/mlflow-image:2.7.0
+        imagePullPolicy: Always
         command: [bash]
         env:
           - name: MLFLOW_TRACKING_URI
@@ -68,28 +69,47 @@ spec:
 
     - name: build-onnx-jars
       inputs:
+        parameters:
+          - name: gemfire_repo_secret_name
+            value: #@ data.values.gemfire_repo_secret_name
+          - name: gemfire_repo_secret_name_username_key
+            value: #@ data.values.gemfire_repo_secret_name_username_key
+          - name: gemfire_repo_secret_name_password_key
+            value: #@ data.values.gemfire_repo_secret_name_password_key
         artifacts:
           - name: onnx-packaging-code
             path: /tmp
             git:
               repo: #@ data.values.onnxpackaging_git_repo
               singleBranch: true
-              branch: #@ data.values.environment_name
+              branch: main
       script:
         image: #@ data.values.jdk_image
         workingDir: /tmp
         volumeMounts:
           - name: workdir
             mountPath: /opt
+        env:
+          - name: GEMFIRE_RELEASE_REPO_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: "{{inputs.parameters.gemfire_repo_secret_name}}"
+                key: "{{inputs.parameters.gemfire_repo_secret_name_username_key}}"
+          - name: GEMFIRE_RELEASE_REPO_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: "{{inputs.parameters.gemfire_repo_secret_name}}"
+                key: "{{inputs.parameters.gemfire_repo_secret_name_password_key}}"
         command: [bash]
         source: |
           set -e;
-          ls -ltr /opt;
           cd java/onnxinference;
-          envsubst < settings.xml.template > settings.xml;
-          ./mvnw clean package -f pom-onnx.xml -s settings.xml;
+          eval "cat <<EOF
+          $(<settings.xml.template)
+          EOF" > settings.xml;
+          ./mvnw clean install -f pom-onnx.xml -s settings.xml;
           cp target/*.jar /opt;
-          ./mvnw clean package -f pom-gemfire.xml -s settings.xml;
+          ./mvnw clean install -f pom-gemfire.xml -s settings.xml;
           cp target/*.jar /opt;
 
     - name: build-onnx-image
@@ -104,7 +124,7 @@ spec:
             git:
               repo: #@ data.values.onnxpackaging_git_repo
               singleBranch: true
-              branch: #@ data.values.environment_name
+              branch: main
         parameters:
           - name: onnx_image
             value: #@ data.values.onnx_java_target_image

@@ -17,10 +17,13 @@ shared_argo_artifact_server: minio-argo.tanzudatatap.com
 shared_argo_artifact_server_bucket: demo
 shared_argo_events_amqp_exchange: mds-fraud-transactions-exchange-global
 shared_argo_events_amqp_routing_key: downstream.randomforest.madlib
-jdk_image: openjdk:11-jdk-alpine
+jdk_image: openjdk:11.0-jdk
 onnx_java_target_image: oawofolu/onnx-java
 onnx_gemfire_cluster_template: deploy/templates/demo-data/gemfire-cluster.yaml
 docker_buildkit_secret_name: docker-config
+gemfire_repo_secret_name: gemfire-repo
+gemfire_repo_secret_name_username_key: gemfire_repo_username
+gemfire_repo_secret_name_password_key: gemfire_repo_password
 
 training_shared_path: /usr/local/greenplum-db/bin/plcontainer_clients
 training_db_script: demo-ml/resources/sql/random_forest_madlib_training.sql
