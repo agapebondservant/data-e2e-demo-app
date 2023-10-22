@@ -39,6 +39,8 @@ spec:
         parameters:
           - name: onnx_gemfire_cluster_template
             value: #@ data.values.onnx_gemfire_cluster_template
+          - name: onnx_dockerfile
+            value: #@ data.values.onnx_gemfire_dockerfile_template
         artifacts:
           - name: ml-artifacts
             path: /tmp
@@ -65,6 +67,7 @@ spec:
         source: |
           set -e;
           cp "{{inputs.parameters.onnx_gemfire_cluster_template}}" /opt;
+          cp "{{inputs.parameters.onnx_dockerfile}}"/Dockerfile /opt;
           python demo-ml/jobs/fetch_artifacts.py;
 
     - name: build-onnx-jars
@@ -108,9 +111,10 @@ spec:
           $(<settings.xml.template)
           EOF" > settings.xml;
           ./mvnw clean install -f pom-onnx.xml -s settings.xml;
-          cp target/*.jar /opt;
+          rm target/original*.jar; cp target/*.jar /opt;
           ./mvnw clean install -f pom-gemfire.xml -s settings.xml;
-          cp target/*.jar /opt;
+          rm target/original*.jar; cp target/*.jar /opt;
+          ls -ltr /opt;
 
     - name: build-onnx-image
       volumes:
@@ -118,36 +122,35 @@ spec:
           secret:
             secretName: #@ data.values.docker_buildkit_secret_name
       inputs:
-        artifacts:
-          - name: onnx-packaging-code
-            path: /tmp
-            git:
-              repo: #@ data.values.onnxpackaging_git_repo
-              singleBranch: true
-              branch: main
         parameters:
           - name: onnx_image
             value: #@ data.values.onnx_java_target_image
       container:
-        image: moby/buildkit:master
+        image: moby/buildkit:v0.9.3-rootless
         command: [ buildctl-daemonless.sh ]
+        securityContext:
+          privileged: true
         readinessProbe:
           exec:
-            command: [ sh, -c, "buildctl debug workers" ]
+            command: [ sh, -c, "buildctl debug workers;" ]
         env:
           - name: DOCKER_CONFIG
             value: /.docker
+          - name: BUILDKITD_FLAGS
+            value: --oci-worker-no-process-sandbox
         volumeMounts:
           - name: workdir
-            mountPath: /opt
+            mountPath: /tmp/artifacts
           - name: docker-config
             mountPath: /.docker
-        securityContext:
-          runAsUser: 0
-          fsGroup: 1000
+        workingDir: /tmp/artifacts
         args:
           - build
-          - --frontend dockerfile.v0
-          - --local context=/opt
-          - --local dockerfile=/tmp/deploy/templates/dockerfiles/onnx-gemfire
-          - --output type=image,name=docker.io/"{{inputs.parameters.onnx_image}}",push=true
+          - --frontend
+          - dockerfile.v0
+          - --local
+          - context=.
+          - --local
+          - dockerfile=.
+          - --output
+          - type=image,name=docker.io/{{inputs.parameters.onnx_image}},push=true

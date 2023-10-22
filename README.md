@@ -76,6 +76,12 @@ deploy/templates/scripts/deploy-argo-minio-server.sh
 deploy/templates/scripts/deploy-additional-secrets.sh
 ```
 
+7. Build and push MLflow Client container image (currently assumes docker registry - for other container registries, update the script below):
+```
+docker build -t ${DATA_E2E_REGISTRY_USERNAME}/mlflow-image:2.7.0 .
+docker push ${DATA_E2E_REGISTRY_USERNAME}/mlflow-image
+```
+
 ### Set up Gemfire and RabbitMQ <a name=gemfire-and-rabbit>
 1. Create target namespace for backing services:
 ```

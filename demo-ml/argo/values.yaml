@@ -20,6 +20,7 @@ shared_argo_events_amqp_routing_key: downstream.randomforest.madlib
 jdk_image: openjdk:11.0-jdk
 onnx_java_target_image: oawofolu/onnx-java
 onnx_gemfire_cluster_template: deploy/templates/demo-data/gemfire-cluster.yaml
+onnx_gemfire_dockerfile_template: deploy/templates/dockerfiles/onnx-gemfire
 docker_buildkit_secret_name: docker-config
 gemfire_repo_secret_name: gemfire-repo
 gemfire_repo_secret_name_username_key: gemfire_repo_username
