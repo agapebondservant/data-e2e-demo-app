@@ -26,3 +26,7 @@ kubectl create secret docker-registry image-pull-secret-3 \
 kubectl create secret generic docker-config \
         --from-literal="config.json={\"auths\": {\"https://index.docker.io/v1/\": {\"auth\": \"$(echo -n $DATA_E2E_REGISTRY_USERNAME:$DATA_E2E_REGISTRY_PASSWORD|base64)\"}}}" \
         --dry-run -o yaml | kubectl apply -n argo -f -
+
+kubectl create secret generic gemfire-repo \
+        --from-literal="gemfire_repo_username=${GEMFIRE_RELEASE_REPO_USERNAME}" --from-literal="gemfire_repo_password=${GEMFIRE_RELEASE_REPO_PASSWORD}" \
+        --dry-run -o yaml | kubectl apply -n argo -f -

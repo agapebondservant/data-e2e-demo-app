@@ -42,6 +42,7 @@ tanzu acc create realtime-analytics-acc --git-repository https://github.com/agap
 - [ ] values.yaml files (must create `deploy/templates/demo-ui/values.yaml` and `deploy/templates/demo-data/values.yaml`; use values-template.yaml as a guide)
 - [ ] psql client
 - [ ] Spring Cloud Data Flow
+- [ ] DataHub
 
 2. Prepare manifest files:
 ```
@@ -68,6 +69,17 @@ kubectl apply -f demo-ml/argo/install-argo-events-validatinghook.yaml
 5. Deploy Minio server for Argo:
 ```
 deploy/templates/scripts/deploy-argo-minio-server.sh
+```
+
+6. Deploy additional secrets:
+```
+deploy/templates/scripts/deploy-additional-secrets.sh
+```
+
+7. Build and push MLflow Client container image (currently assumes docker registry - for other container registries, update the script below):
+```
+docker build -t ${DATA_E2E_REGISTRY_USERNAME}/mlflow-image:2.7.0 .
+docker push ${DATA_E2E_REGISTRY_USERNAME}/mlflow-image
 ```
 
 ### Set up Gemfire and RabbitMQ <a name=gemfire-and-rabbit>
