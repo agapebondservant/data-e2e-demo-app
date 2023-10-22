@@ -21,4 +21,11 @@ training-db-secret.yaml
 inference-db-secret.yaml
 credit_card_resampled.csv
 deploy/templates/demo-minio/minio-http-proxy.yaml
-deploy/templates/demo-minio/openssl.conf
+deploy/templates/demo-minio/openssl.confDockerfile-mlflow
+Dockerfile-tmp
+deploy/templates/demo-data/values.yaml
+testjob.yaml
+tmp.txt
+tmp/
+tmp.yaml
+Dockerfile-mlflow

@@ -1,0 +1,15 @@
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: minio-argo-httpproxy
+  namespace: minio-argo
+spec:
+  routes:
+    - conditions:
+        - prefix: /
+      services:
+        - name: minio
+          port: 9000
+  virtualhost:
+    fqdn: ${ARGO_S3_ENDPOINT_FQDN}
+    

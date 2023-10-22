@@ -236,6 +236,8 @@ spec:
               value: #@ data.values.shared_argo_events_amqp_exchange
             - name: shared_argo_events_amqp_routing_key
               value: #@ data.values.shared_argo_events_amqp_routing_key
+            - name: inference_cache_server
+              value: #@ data.values.inference_cache_gemfire_server
         container:
           image: oawofolu/demo-ml-base
           command: [ python ]
@@ -291,5 +293,7 @@ spec:
               value: "{{inputs.parameters.shared_argo_events_amqp_exchange}}"
             - name: rmq_routing_key
               value: "{{inputs.parameters.shared_argo_events_amqp_routing_key}}"
+            - name: inference_cache_server
+              value: "{{inputs.parameters.inference_cache_server}}"
           args:
             - "{{inputs.parameters.entrypoint}}"
