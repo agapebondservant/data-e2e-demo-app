@@ -1,0 +1,16 @@
+apiVersion: kappctrl.k14s.io/v1alpha1
+kind: App
+metadata:
+  name: onnx-gemfire-appcr
+spec:
+  serviceAccountName: default
+  fetch:
+    - image:
+        url: oawofolu/onnx-java
+        secretRef:
+          name: image-pull-secret-3
+        subPath: /usr/share/nginx/yaml
+  template:
+    - ytt: {}
+  deploy:
+    - kapp: {}
