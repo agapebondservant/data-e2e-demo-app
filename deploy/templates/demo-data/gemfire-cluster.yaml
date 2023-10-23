@@ -4,6 +4,11 @@ apiVersion: gemfire.vmware.com/v1
 kind: GemFireCluster
 metadata:
   name: gfanomaly
+  annotations:
+    kapp.k14s.io/versioned-explicit-ref: |
+      apiVersion: v1
+      kind: ConfigMap
+      name: gfanomaly-onnx-config
 spec:
   image: registry.tanzu.vmware.com/pivotal-gemfire/vmware-gemfire:10.0.0
   security:
@@ -22,7 +27,29 @@ spec:
       gemFireProperties:
         - name: "start-dev-rest-api"
           value: "true"
-
+      statefulSet:
+        spec:
+          template:
+            spec:
+              volumes:
+                - name: onnx-config-vol
+                  configMap:
+                    name: gfanomaly-onnx-config
+                    items:
+                      - key: special_field
+                        path: special_field
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gfanomaly-onnx-config
+  annotations:
+    kapp.k14s.io/versioned: ""
+    kapp.k14s.io/num-versions: "1"
+    kapp.k14s.io/disable-wait: ""
+    kapp.k14s.io/update-strategy: always-replace
+data:
+  special_field: new-deployment
 ---
 apiVersion: v1
 kind: Service
