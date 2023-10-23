@@ -113,7 +113,7 @@ spec:
           EOF" > settings.xml;
           cp /opt/**/*.onnx src/main/resources;
           ./mvnw clean install -f pom-onnx.xml -s settings.xml;
-          rm -f target/original*.jar; rm -f src/main/resources/*.onnx; cp target/*.jar /opt;
+          rm -f target/original*.jar; cp target/*.jar /opt;
           ./mvnw clean install -f pom-gemfire.xml -s settings.xml;
           rm -f target/original*.jar; cp target/*.jar /opt;
           ls -ltr /opt;
