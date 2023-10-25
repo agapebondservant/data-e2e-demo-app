@@ -31,3 +31,8 @@ tmp.yaml
 testjob.yaml
 Dockerfile-tmp
 deploy/templates/demo-data/values.yaml
+regimageloader*.yaml
+nginx/
+test-appcr.yaml
+testconfig.yaml
+testworkflow.yaml
