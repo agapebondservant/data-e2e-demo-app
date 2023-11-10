@@ -17,6 +17,7 @@ spec:
           - demo-ml/argo/ml-training-pipeline.yaml
           - demo-ml/argo/argo-rabbitmq-ml-inference-trigger.yaml
           - demo-ml/argo/values.yaml
+          - .git/HEAD
 
   deploy:
     - kapp: {}
