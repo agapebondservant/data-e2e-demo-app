@@ -284,7 +284,8 @@ kubectl apply -f demo-ml/argo/training-db-sealedsecret.yaml -nargo
 kubectl apply -f demo-ml/argo/inference-db-sealedsecret.yaml -nargo
 ```
 
-8. Deploy ML pipelines:
+8. Deploy ML pipelines (without GitOps - to deploy with GitOps, skip to Step 9):
+* Without AppCR:
 ```
 ytt -f demo-ml/argo/install-argo-events-eventbus.yaml | kubectl apply -nargo -f -
 ytt -f demo-ml/argo/argo-rabbitmq-eventsource.yaml -f demo-ml/argo/values.yaml  | kubectl apply -nargo -f -
@@ -292,7 +293,7 @@ ytt -f demo-ml/argo/argo-rabbitmq-ml-inference-trigger.yaml -f demo-ml/argo/valu
 ytt -f demo-ml/argo/ml-training-pipeline.yaml -f demo-ml/argo/values.yaml | kubectl apply -nargo -f -
 ```
 
-9. View progress:
+* View progress:
 ```
 watch kubectl get pods -nargo
 ```
@@ -303,6 +304,30 @@ ytt -f demo-ml/argo/ml-training-pipeline.yaml -f demo-ml/argo/values.yaml | kube
 ytt -f demo-ml/argo/argo-rabbitmq-eventsource.yaml -f demo-ml/argo/values.yaml  | kubectl delete -nargo -f -
 ytt -f demo-ml/argo/argo-rabbitmq-ml-inference-trigger.yaml -f demo-ml/argo/values.yaml  | kubectl delete -nargo -f -
 ytt -f demo-ml/argo/install-argo-events-eventbus.yaml | kubectl delete -nargo -f -
+```
+
+9. Deploy ML pipelines (with GitOps):
+* Main:
+```
+kapp deploy -a random-forest-training-main --logs -y  -nargo -f demo-ml/appcr/pipeline_app.yaml
+```
+
+* Onnx:
+```
+kapp deploy -a random-forest-training-onnx --logs -y  -nargo -f demo-ml/appcr/pipeline_app.yaml
+```
+
+
+* View progress:
+```
+kubectl get app -oyaml  -nargo
+```
+
+
+* To delete the pipeline:
+```
+kapp delete -a random-forest-training-main -y -nargo
+kapp delete -a random-forest-training-onnx -y -nargo
 ```
 
 ## Alternative: Installing on local workstation <a name=workstation>

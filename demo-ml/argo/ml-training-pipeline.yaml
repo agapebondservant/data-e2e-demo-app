@@ -3,15 +3,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: CronWorkflow
 metadata:
-  name: random-forest-train-workflow
-  annotations:
-    kapp.k14s.io/versioned: ""
-    kapp.k14s.io/nonce: ""
-    kapp.k14s.io/disable-wait: ""
+  name: #@ "random-forest-train-workflow-"  + data.read("HEAD").strip()
 spec:
   schedule: "*/1 * * * *"
   concurrencyPolicy: "Forbid"
   startingDeadlineSeconds: 0
+  synchronization:
+    mutex:
+      name: fraud-detection-train
   workflowSpec:
     securityContext:
       runAsUser: 1000
@@ -297,3 +296,15 @@ spec:
               value: "{{inputs.parameters.inference_cache_server}}"
           args:
             - "{{inputs.parameters.entrypoint}}"
+---
+apiVersion: kapp.k14s.io/v1alpha1
+kind: Config
+rebaseRules:
+  - paths:
+      - [spec]
+      - [metadata, annotations]
+      - [metadata, labels]
+    type: copy
+    sources: [existing]
+    resourceMatchers:
+      - apiVersionKindMatcher: {apiVersion: argoproj.io/v1alpha1, kind: CronWorkflow}

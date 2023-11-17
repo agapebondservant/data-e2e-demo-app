@@ -21,6 +21,13 @@ spec:
       jvmOptions:
         - "-Djava.net.preferIPv4Stack=true"
   servers:
+    libraries:
+      - name: gemfire-onnx-models
+        container:
+          image: oawofolu/onnx-java:latest
+          path: "/usr/share/nginx/other/*.jar"
+          imagePullSecretRef:
+            name: image-pull-secret-3
     overrides:
       jvmOptions:
         - "-Djava.net.preferIPv4Stack=true"
@@ -31,6 +38,7 @@ spec:
         spec:
           template:
             spec:
+              containers: []
               volumes:
                 - name: onnx-config-vol
                   configMap:

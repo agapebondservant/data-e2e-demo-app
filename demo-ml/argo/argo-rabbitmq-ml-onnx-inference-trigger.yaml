@@ -1,0 +1,174 @@
+#@ load("@ytt:data", "data")
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: fraud-detection-onnx-amqp
+spec:
+  dependencies:
+    - name: main-dep
+      eventSourceName: amqp
+      eventName: fraud-detection
+  triggers:
+    - template:
+        name: amqp-workflow-onnx-trigger
+        k8s:
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: random-forest-onnx-package-workflow-
+                annotations:
+                  kapp.k14s.io/versioned: ""
+                  kapp.k14s.io/nonce: ""
+                  kapp.k14s.io/disable-wait: ""
+              spec:
+                entrypoint: train
+                securityContext:
+                  runAsUser: 1000
+                  fsGroup: 1000
+                synchronization:
+                  mutex:
+                    name: fraud-detection-package
+                volumeClaimTemplates:
+                  - metadata:
+                      name: workdir
+                    spec:
+                      accessModes: [ "ReadWriteOnce" ]
+                      resources:
+                        requests:
+                          storage: 4Gi
+                templates:
+                  - name: train
+                    steps:
+                      - - name: fetch-artifacts
+                          template: fetch-artifacts
+                      - - name: build-onnx-jars
+                          template: build-onnx-jars
+                      - - name: build-onnx-image
+                          template: build-onnx-image
+
+                  - name: fetch-artifacts
+                    inputs:
+                      parameters:
+                        - name: onnx_gemfire_cluster_template
+                          value: #@ data.values.onnx_gemfire_cluster_template
+                        - name: onnx_dockerfile
+                          value: #@ data.values.onnx_gemfire_dockerfile_template
+                      artifacts:
+                        - name: ml-artifacts
+                          path: /tmp
+                          git:
+                            repo: #@ data.values.mlpipeline_git_repo
+                            singleBranch: true
+                            branch: #@ data.values.environment_name
+                    script:
+                      image: oawofolu/mlflow-image:2.7.0
+                      imagePullPolicy: Always
+                      command: [bash]
+                      env:
+                        - name: MLFLOW_TRACKING_URI
+                          value: #@ data.values.mlflow_tracking_uri
+                        - name: ARTIFACT_DESTINATION
+                          value: /opt
+                      securityContext:
+                        runAsUser: 0
+                        fsGroup: 1000
+                      workingDir: /tmp
+                      volumeMounts:
+                        - name: workdir
+                          mountPath: /opt
+                      source: |
+                        set -e;
+                        cp "{{inputs.parameters.onnx_gemfire_cluster_template}}" /opt;
+                        cp "{{inputs.parameters.onnx_dockerfile}}"/Dockerfile /opt;
+                        python demo-ml/jobs/fetch_artifacts.py;
+
+                  - name: build-onnx-jars
+                    inputs:
+                      parameters:
+                        - name: gemfire_repo_secret_name
+                          value: #@ data.values.gemfire_repo_secret_name
+                        - name: gemfire_repo_secret_name_username_key
+                          value: #@ data.values.gemfire_repo_secret_name_username_key
+                        - name: gemfire_repo_secret_name_password_key
+                          value: #@ data.values.gemfire_repo_secret_name_password_key
+                      artifacts:
+                        - name: onnx-packaging-code
+                          path: /tmp
+                          git:
+                            repo: #@ data.values.onnxpackaging_git_repo
+                            singleBranch: true
+                            branch: main
+                    script:
+                      image: #@ data.values.jdk_image
+                      workingDir: /tmp
+                      volumeMounts:
+                        - name: workdir
+                          mountPath: /opt
+                      env:
+                        - name: GEMFIRE_RELEASE_REPO_USERNAME
+                          valueFrom:
+                            secretKeyRef:
+                              name: "{{inputs.parameters.gemfire_repo_secret_name}}"
+                              key: "{{inputs.parameters.gemfire_repo_secret_name_username_key}}"
+                        - name: GEMFIRE_RELEASE_REPO_PASSWORD
+                          valueFrom:
+                            secretKeyRef:
+                              name: "{{inputs.parameters.gemfire_repo_secret_name}}"
+                              key: "{{inputs.parameters.gemfire_repo_secret_name_password_key}}"
+                      command: [bash]
+                      source: |
+                        set -e;
+                        ls -ltr /opt;
+                        cd java/onnxinference;
+                        eval "cat <<EOF
+                        $(<settings.xml.template)
+                        EOF" > settings.xml;
+                        cp /opt/**/*.onnx src/main/resources;
+                        ./mvnw clean install -f pom-onnx.xml -s settings.xml;
+                        rm -f target/original*.jar; cp target/*.jar /opt;
+                        ./mvnw clean install -f pom-gemfire.xml -s settings.xml;
+                        rm -f target/original*.jar; cp target/*.jar /opt;
+                        ls -ltr /opt;
+
+                  - name: build-onnx-image
+                    volumes:
+                      - name: docker-config
+                        secret:
+                          secretName: #@ data.values.docker_buildkit_secret_name
+                    inputs:
+                      parameters:
+                        - name: onnx_image
+                          value: #@ data.values.onnx_java_target_image
+                    container:
+                      image: moby/buildkit:v0.9.3-rootless
+                      command: [ buildctl-daemonless.sh ]
+                      securityContext:
+                        privileged: true
+                      readinessProbe:
+                        exec:
+                          command: [ sh, -c, "buildctl debug workers;" ]
+                      env:
+                        - name: DOCKER_CONFIG
+                          value: /.docker
+                        - name: BUILDKITD_FLAGS
+                          value: --oci-worker-no-process-sandbox
+                      volumeMounts:
+                        - name: workdir
+                          mountPath: /tmp/artifacts
+                        - name: docker-config
+                          mountPath: /.docker
+                      workingDir: /tmp/artifacts
+                      args:
+                        - build
+                        - --frontend
+                        - dockerfile.v0
+                        - --local
+                        - context=.
+                        - --local
+                        - dockerfile=.
+                        - --output
+                        - type=image,name=docker.io/{{inputs.parameters.onnx_image}},push=true
