@@ -32,7 +32,7 @@ training_hyperparameters_db_script: demo-ml/resources/sql/hyperparameters.sql
 training_code_shell_script: demo-ml/resources/shell/deploy_training_code.sh
 training_db_shell_script: demo-ml/resources/shell/deploy_training_db.sh
 training_user: gpadmin
-training_master: 44.201.91.88
+training_master: ec2-44-201-91-88.compute-1.amazonaws.com
 training_db_name: dev
 training_external_secret_ref: greenplum-training-secret
 training_external_secret_ref_key: greenplum_master_password
