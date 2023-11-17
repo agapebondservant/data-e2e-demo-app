@@ -1,0 +1,16 @@
+#@ load("@ytt:data", "data")
+---
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: demo-app-svc-httpproxy
+  namespace: vmware-explore
+spec:
+  routes:
+    - conditions:
+        - prefix: /
+      services:
+        - name: demo-app-svc
+          port: 8090
+  virtualhost:
+    fqdn: #@ 'demo-app.' + data.values.fqdn_domain
