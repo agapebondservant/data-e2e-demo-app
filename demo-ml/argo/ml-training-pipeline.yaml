@@ -18,6 +18,9 @@ spec:
       fsGroup: 1000
     entrypoint: train
     onExit: exit-handler
+    synchronization:
+      mutex:
+        name: fraud-detection-cron
     templates:
       - name: train
         steps:
