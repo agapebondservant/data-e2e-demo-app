@@ -176,7 +176,7 @@ source .env
 kubectl create ns vmware-explore
 kubectl create secret docker-registry image-pull-secret -n vmware-explore --docker-server=index.docker.io --docker-username=$DATA_E2E_REGISTRY_USERNAME --docker-password=$DATA_E2E_REGISTRY_PASSWORD
 ytt -f deploy/templates/demo-ui/ | kubectl apply -f -
-kubectl apply -f deploy/templates/demo-app/
+ytt -f deploy/templates/demo-app/ | kubectl apply -f -
 ```
 
 4. Verify that the backend and frontend deployments show "Ready" status:
@@ -306,7 +306,7 @@ ytt -f demo-ml/argo/argo-rabbitmq-ml-inference-trigger.yaml -f demo-ml/argo/valu
 ytt -f demo-ml/argo/install-argo-events-eventbus.yaml | kubectl delete -nargo -f -
 ```
 
-9. Deploy ML pipelines (with GitOps):
+9. TODO: Deploy ML pipelines (with GitOps):
 * Main:
 ```
 kapp deploy -a random-forest-training-main --logs -y  -nargo -f demo-ml/appcr/pipeline_app.yaml

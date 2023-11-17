@@ -243,6 +243,7 @@ spec:
               value: #@ data.values.inference_cache_gemfire_server
         container:
           image: oawofolu/demo-ml-base
+          imagePullPolicy: Always
           command: [ python ]
           securityContext:
             runAsUser: 0

@@ -37,3 +37,5 @@ test-appcr.yaml
 testconfig.yaml
 testworkflow.yaml
 mlruns/
+deploy/templates/demo-app/values.yaml
+deploy/templates/demo-ui/values.yaml
