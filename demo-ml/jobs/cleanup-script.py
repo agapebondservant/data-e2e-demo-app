@@ -30,8 +30,10 @@ Clean up pipelines
 """
 print("Cleaning up ML pipelines...")
 subprocess.run(
-    'kapp delete -a random-forest-training-main -y -nargo ;' +
-    'kapp delete -a random-forest-training-onnx -y -nargo;', shell=True)
+    'ytt -f demo-ml/argo/ml-training-pipeline.yaml -f demo-ml/argo/values.yaml | kubectl delete -nargo -f - ;' +
+    'ytt -f demo-ml/argo/argo-rabbitmq-eventsource.yaml -f demo-ml/argo/values.yaml  | kubectl delete -nargo -f - ;' +
+    'ytt -f demo-ml/argo/argo-rabbitmq-ml-inference-trigger.yaml -f demo-ml/argo/values.yaml  | kubectl delete -nargo -f - ;' +
+    'ytt -f demo-ml/argo/install-argo-events-eventbus.yaml | kubectl delete -nargo -f - ;', shell=True)
 print("ML pipelines cleanup complete.")
 
 """
