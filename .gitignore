@@ -36,3 +36,4 @@ nginx/
 test-appcr.yaml
 testconfig.yaml
 testworkflow.yaml
+mlruns/
