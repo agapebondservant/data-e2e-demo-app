@@ -3,7 +3,11 @@
 apiVersion: argoproj.io/v1alpha1
 kind: CronWorkflow
 metadata:
-  name: #@ "random-forest-train-workflow-"  + data.read("HEAD").strip()
+  name: random-forest-train-workflow
+  annotations:
+    kapp.k14s.io/versioned: ""
+    kapp.k14s.io/nonce: ""
+    kapp.k14s.io/disable-wait: ""
 spec:
   schedule: "*/1 * * * *"
   concurrencyPolicy: "Forbid"
@@ -14,6 +18,9 @@ spec:
       fsGroup: 1000
     entrypoint: train
     onExit: exit-handler
+    synchronization:
+      mutex:
+        name: fraud-detection-cron
     templates:
       - name: train
         steps:
