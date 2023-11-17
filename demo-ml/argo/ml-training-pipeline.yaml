@@ -293,15 +293,3 @@ spec:
               value: "{{inputs.parameters.inference_cache_server}}"
           args:
             - "{{inputs.parameters.entrypoint}}"
----
-apiVersion: kapp.k14s.io/v1alpha1
-kind: Config
-rebaseRules:
-  - paths:
-      - [spec]
-      - [metadata, annotations]
-      - [metadata, labels]
-    type: copy
-    sources: [existing]
-    resourceMatchers:
-      - apiVersionKindMatcher: {apiVersion: argoproj.io/v1alpha1, kind: CronWorkflow}
