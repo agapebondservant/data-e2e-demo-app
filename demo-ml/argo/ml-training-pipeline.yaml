@@ -12,6 +12,9 @@ spec:
   schedule: "*/1 * * * *"
   concurrencyPolicy: "Forbid"
   startingDeadlineSeconds: 0
+  synchronization:
+    mutex:
+      name: fraud-detection-train
   workflowSpec:
     securityContext:
       runAsUser: 1000
