@@ -4,10 +4,6 @@ apiVersion: argoproj.io/v1alpha1
 kind: CronWorkflow
 metadata:
   name: random-forest-train-workflow
-  annotations:
-    kapp.k14s.io/versioned: ""
-    kapp.k14s.io/nonce: ""
-    kapp.k14s.io/disable-wait: ""
 spec:
   schedule: "*/1 * * * *"
   concurrencyPolicy: "Forbid"
