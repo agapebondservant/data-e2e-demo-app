@@ -24,6 +24,7 @@ spec:
                   kapp.k14s.io/versioned: ""
                   kapp.k14s.io/nonce: ""
                   kapp.k14s.io/disable-wait: ""
+                  kapp.k14s.io/owned-for-deletion: ""
               spec:
                 securityContext:
                   runAsUser: 1000
