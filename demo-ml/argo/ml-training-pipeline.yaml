@@ -4,6 +4,10 @@ apiVersion: argoproj.io/v1alpha1
 kind: CronWorkflow
 metadata:
   name: random-forest-train-workflow
+  annotations:
+    kapp.k14s.io/versioned: ""
+    kapp.k14s.io/nonce: ""
+    kapp.k14s.io/disable-wait: ""
 spec:
   schedule: "*/1 * * * *"
   concurrencyPolicy: "Forbid"
@@ -274,9 +278,9 @@ spec:
                   name: "{{inputs.parameters.inference_external_secret_ref}}"
                   key: "{{inputs.parameters.inference_external_secret_ref_key}}"
             - name: training_db_uri_full
-              value: postgresql://"{{inputs.parameters.training_user}}":$training_password@"{{inputs.parameters.training_master}}"/"{{inputs.parameters.training_db_name}}"?sslmode=require
+              value: postgresql://{{inputs.parameters.training_user}}:$training_password@{{inputs.parameters.training_master}}/{{inputs.parameters.training_db_name}}?sslmode=require
             - name: inference_db_uri_full
-              value: postgresql://"{{inputs.parameters.inference_user}}":$inference_password@"{{inputs.parameters.inference_host}}"/"{{inputs.parameters.inference_db_name}}"
+              value: postgresql://{{inputs.parameters.inference_user}}:$inference_password@{{inputs.parameters.inference_host}}/{{inputs.parameters.inference_db_name}}
             - name: rmq_user
               valueFrom:
                 secretKeyRef:
