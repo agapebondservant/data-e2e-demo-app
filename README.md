@@ -78,8 +78,10 @@ deploy/templates/scripts/deploy-additional-secrets.sh
 
 7. Build and push MLflow Client container image (currently assumes docker registry - for other container registries, update the script below):
 ```
+cd deploy/templates/dockerfiles/mlflow-client
 docker build -t ${DATA_E2E_REGISTRY_USERNAME}/mlflow-image:2.7.0 .
 docker push ${DATA_E2E_REGISTRY_USERNAME}/mlflow-image
+cd -
 ```
 
 ### Set up Gemfire and RabbitMQ <a name=gemfire-and-rabbit>
@@ -306,7 +308,7 @@ ytt -f demo-ml/argo/argo-rabbitmq-ml-inference-trigger.yaml -f demo-ml/argo/valu
 ytt -f demo-ml/argo/install-argo-events-eventbus.yaml | kubectl delete -nargo -f -
 ```
 
-9. TODO: Deploy ML pipelines (with GitOps):
+9. Deploy ML pipelines (with GitOps):
 * Main:
 ```
 kapp deploy -a random-forest-training-main --logs -y  -nargo -f demo-ml/appcr/pipeline_app.yaml

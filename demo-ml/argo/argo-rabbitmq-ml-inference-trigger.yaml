@@ -107,10 +107,10 @@ spec:
                             key: anomaly-detection/sample.tgz
                             accessKeySecret:
                               name: minio
-                              key: accesskey
+                              key: root-user
                             secretKeySecret:
                               name: minio
-                              key: secretkey
+                              key: root-password
                       parameters:
                         - name: user
                           value: #@ data.values.inference_user
