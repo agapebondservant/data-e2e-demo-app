@@ -78,8 +78,10 @@ deploy/templates/scripts/deploy-additional-secrets.sh
 
 7. Build and push MLflow Client container image (currently assumes docker registry - for other container registries, update the script below):
 ```
+cd deploy/templates/dockerfiles/mlflow-client
 docker build -t ${DATA_E2E_REGISTRY_USERNAME}/mlflow-image:2.7.0 .
 docker push ${DATA_E2E_REGISTRY_USERNAME}/mlflow-image
+cd -
 ```
 
 ### Set up Gemfire and RabbitMQ <a name=gemfire-and-rabbit>
@@ -176,7 +178,7 @@ source .env
 kubectl create ns vmware-explore
 kubectl create secret docker-registry image-pull-secret -n vmware-explore --docker-server=index.docker.io --docker-username=$DATA_E2E_REGISTRY_USERNAME --docker-password=$DATA_E2E_REGISTRY_PASSWORD
 ytt -f deploy/templates/demo-ui/ | kubectl apply -f -
-kubectl apply -f deploy/templates/demo-app/
+ytt -f deploy/templates/demo-app/ | kubectl apply -f -
 ```
 
 4. Verify that the backend and frontend deployments show "Ready" status:
