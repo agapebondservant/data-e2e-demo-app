@@ -38,3 +38,4 @@ deploy/templates/demo-data/values.yaml
 /testworkflow.yaml
 demo-ml/argo/inference-db-sealedsecret.yaml
 demo-ml/argo/training-db-sealedsecret.yaml
+.env-secret
