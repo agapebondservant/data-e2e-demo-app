@@ -2,7 +2,7 @@
 
 * Deploy the app (on TAP):
 ```
-tanzu apps workload create realtimedemo-tap -f resources/tapworkloads/workload.yaml --yes
+tanzu apps workload create realtimedemo-tap -f workload.yaml --yes
 ```
 
 * Tail the logs of the main app:
