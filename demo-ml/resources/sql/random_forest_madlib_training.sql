@@ -3,7 +3,6 @@
 ---------------------------------------------------------------------------------
 -- TRAINING
 ---------------------------------------------------------------------------------
-DROP FUNCTION IF EXISTS run_random_forest_training();
 CREATE OR REPLACE FUNCTION public.run_random_forest_training()
 RETURNS table (
     id bigint,

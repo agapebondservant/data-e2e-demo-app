@@ -41,3 +41,4 @@ deploy/templates/demo-app/values.yaml
 deploy/templates/demo-ui/values.yaml
 demo-ml/argo/inference-db-sealedsecret.yaml
 demo-ml/argo/training-db-sealedsecret.yaml
+.env-secret
