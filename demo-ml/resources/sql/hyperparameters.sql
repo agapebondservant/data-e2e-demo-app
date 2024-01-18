@@ -3,7 +3,6 @@
 ---------------------------------------------------------------------------------
 -- HYPERPARAMETERS
 ---------------------------------------------------------------------------------
-DROP FUNCTION IF EXISTS hyperparams();
 CREATE OR REPLACE FUNCTION hyperparams(code text)
 RETURNS INTEGER
 AS $BODY$
