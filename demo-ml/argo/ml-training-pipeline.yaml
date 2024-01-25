@@ -237,8 +237,11 @@ spec:
               value: #@ data.values.shared_argo_events_amqp_routing_key
             - name: inference_cache_server
               value: #@ data.values.inference_cache_gemfire_server
+            - name: inference_snapshot_region
+              value: #@ data.values.inference_cache_gemfire_snapshot_region
         container:
           image: oawofolu/demo-ml-base
+          imagePullPolicy: Always
           command: [ python ]
           securityContext:
             runAsUser: 0
@@ -294,5 +297,7 @@ spec:
               value: "{{inputs.parameters.shared_argo_events_amqp_routing_key}}"
             - name: inference_cache_server
               value: "{{inputs.parameters.inference_cache_server}}"
+            - name: inference_snapshot_region
+              value: "{{inputs.parameters.inference_snapshot_region}}"
           args:
             - "{{inputs.parameters.entrypoint}}"
