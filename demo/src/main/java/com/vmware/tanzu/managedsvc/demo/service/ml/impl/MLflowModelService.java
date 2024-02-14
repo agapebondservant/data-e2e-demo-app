@@ -3,6 +3,7 @@ package com.vmware.tanzu.managedsvc.demo.service.ml.impl;
 import com.vmware.tanzu.managedsvc.demo.model.MlflowModelVersion;
 import com.vmware.tanzu.managedsvc.demo.service.ml.MLModelService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 @Service("MLFLOW")
 @Slf4j
 @RequiredArgsConstructor
+@Log
 public class MLflowModelService implements MLModelService {
 
     @Value("${mlmodel.registry}")
@@ -34,7 +36,7 @@ public class MLflowModelService implements MLModelService {
 
     @Override
     public Optional<MlflowModelVersion> getActiveModelInfo() {
-        log.info("MLFlow tracking server...{}", mlFlowTrackingServer);
+        log.info("MLFlow tracking server..." + mlFlowTrackingServer);
 
         MlflowModelVersion[] modelVersions =
                 this.restTemplate

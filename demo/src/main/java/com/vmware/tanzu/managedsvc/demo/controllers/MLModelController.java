@@ -3,6 +3,7 @@ package com.vmware.tanzu.managedsvc.demo.controllers;
 import com.vmware.tanzu.managedsvc.demo.enums.MLModelType;
 import com.vmware.tanzu.managedsvc.demo.service.ml.MLModelService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import java.util.Collections;
 @RequestMapping("/mlmodel")
 @RequiredArgsConstructor
 @Slf4j
+@Log
 public class MLModelController {
 
     @Autowired
