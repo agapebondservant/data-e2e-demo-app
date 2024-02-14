@@ -114,7 +114,8 @@ watch kubectl get all -n $DEMO_NS
 
 6. Create Gemfire regions:
 ```
-kubectl exec -it gfanomaly-server-0 -n $DEMO_NS -- gfsh -e "connect --locator=gfanomaly-locator-0.gfanomaly-locator.anomaly-ns.svc.cluster.local[10334]" -e "create region --name=mds-region --type=PARTITION --enable-statistics --entry-idle-time-expiration=300" -e "create region --name=mds-region-greenplum --type=PARTITION --enable-statistics --entry-idle-time-expiration=300" -e "create region --name=mds-region-greenplum-snapshot --type=PARTITION --eviction-entry-count=2 --eviction-action=overflow-to-disk"
+#kubectl exec -it gfanomaly-server-0 -n $DEMO_NS -- gfsh -e "connect --locator=gfanomaly-locator-0.gfanomaly-locator.anomaly-ns.svc.cluster.local[10334]" -e "create region --name=mds-region --type=PARTITION --enable-statistics --entry-idle-time-expiration=300" -e "create region --name=mds-region-greenplum --type=PARTITION --enable-statistics --entry-idle-time-expiration=300" -e "create region --name=mds-region-greenplum-snapshot --type=PARTITION --eviction-entry-count=2 --eviction-action=overflow-to-disk"
+kubectl exec -it gfanomaly-server-0 -n $DEMO_NS -- gfsh -e "connect --locator=gfanomaly-locator-0.gfanomaly-locator.anomaly-ns.svc.cluster.local[10334]" -e "create region --name=mds-region --type=PARTITION --enable-statistics --entry-idle-time-expiration=300" -e "create region --name=mds-region-greenplum --type=PARTITION --enable-statistics" -e "create region --name=mds-region-greenplum-snapshot --type=REPLICATE --eviction-entry-count=2 --eviction-action=overflow-to-disk"
 ```
 
 7. Deploy RabbitMQ operator (if it has not already been installed):
@@ -166,7 +167,7 @@ cd -
 2. Build backend container image dependency (if it has not already been built, or if changes were made to the code):
 ```
 cd demo
-mvn package
+mvn clean package
 docker build -t $DATA_E2E_REGISTRY_USERNAME/demo-app-anomaly .
 docker push $DATA_E2E_REGISTRY_USERNAME/demo-app-anomaly
 cd -
