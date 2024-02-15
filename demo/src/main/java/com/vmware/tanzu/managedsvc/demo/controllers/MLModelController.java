@@ -1,6 +1,7 @@
 package com.vmware.tanzu.managedsvc.demo.controllers;
 
 import com.vmware.tanzu.managedsvc.demo.enums.MLModelType;
+import com.vmware.tanzu.managedsvc.demo.model.MlflowModelVersion;
 import com.vmware.tanzu.managedsvc.demo.service.ml.MLModelService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
@@ -30,7 +31,7 @@ public class MLModelController {
     @GetMapping
     public @ResponseBody ResponseEntity<?> getActiveModelInfo() {
         log.info("Getting active production model... ");
-        Object response = ObjectUtils.defaultIfNull( mlModelService.getActiveModelInfo().get(), Collections.EMPTY_MAP );
+        Object response = mlModelService.getActiveModelInfo().orElseGet(() -> new MlflowModelVersion());
         return ResponseEntity.ok(response);
     }
 }

@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Data
 @AllArgsConstructor
@@ -12,8 +14,6 @@ import lombok.*;
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class MlflowModelVersion {
-    private String name;
-    private String version;
-    private String currentStage;
+public class MlflowModelVersionList {
+    private List<MlflowModelVersion> modelVersions;
 }
