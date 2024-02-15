@@ -7,6 +7,7 @@
 5. [TODO: Installing on TAP](#tap)
 6. [TODO: Integrating ML/MLOps](#mlops)
 7. [Alternative: Installing on Workstation](#workstation)
+8. [Pre-requisites for workshops/demos](#demos)
 
 <div style="color: #ceddee;">
 <hr/>
@@ -341,3 +342,14 @@ kapp delete -a random-forest-training-onnx -y -nargo
 
 ## Alternative: Installing on local workstation <a name=workstation>
 Instructions are provided in the main branch: [link](https://gitlab.eng.vmware.com/oawofolu/vmware-explore-demo-app)
+
+## Alternative: Installing on local workstation <a name=workstation>
+Run the following:
+```
+source .env
+source .env-secret
+export PSQL_CONNECT_STR=postgresql://${DATA_E2E_ML_TRAINING_DB_USERNAME}:${DATA_E2E_ML_TRAINING_DB_PASSWORD}@${DATA_E2E_ML_TRAINING_DB_HOST}:${DATA_E2E_ML_TRAINING_DB_PORT}/${DATA_E2E_ML_TRAINING_DB_DATABASE}?sslmode=require
+kapp delete -a random-forest-training-main -y -nargo
+python demo-ml/jobs/cleanup-script.py
+kubectl rollout restart deploy workflow-controller -nargo
+```
