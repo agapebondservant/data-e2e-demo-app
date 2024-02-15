@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Card, CardType, Location, RmqTransaction, Transaction } from 'src/app/app.model';
+import { Card, CardType, Location, RmqTransaction, Transaction, SelectedModel } from 'src/app/app.model';
 import { HttpClient } from '@angular/common/http';
 import '@cds/core/icon/register.js';
 import { alarmClockIcon, ClarityIcons, creditCardIcon, infoCircleIcon, userIcon, vmBugIcon } from '@cds/core/icon';
@@ -28,12 +28,14 @@ export class AppComponent implements OnInit {
     ClarityIcons.addIcons(vmBugIcon, userIcon, alarmClockIcon, creditCardIcon, infoCircleIcon);
 
     this.generateCities();
-    this.getTransactions(this.api);
+    this.getActiveModel();
+    this.getTransactions(this.transactions_api);
     this.drawChart();
     this.startTransactions();
   }
 
-  api: string = environment.API_ENDPOINT + '/demo';
+  transactions_api: string = environment.API_ENDPOINT + '/demo';
+  model_api: string = environment.API_ENDPOINT + '/mlmodel';
   title = 'demo-ui';
 
   cards: Card[] = [
@@ -60,6 +62,16 @@ export class AppComponent implements OnInit {
   llOptions: any;
   llLayers: any[] = [];
   filteredCities: Location[] = [];
+  defaultSelectedModel: SelectedModel = {
+    name: "default",
+    current_stage: "Production",
+    version: "N/A"
+  }
+  selectedModel: SelectedModel = {
+    name: "default",
+    current_stage: "Production",
+    version: "N/A"
+  }
 
   public stop() {
     clearInterval(this.interval);
@@ -67,10 +79,20 @@ export class AppComponent implements OnInit {
 
   public delete() {
     this.httpClient
-      .delete(this.api)
+      .delete(this.transactions_api)
       .subscribe(res => {
-        setTimeout(() => this.getTransactions(this.api), 2000);
+        setTimeout(() => this.getTransactions(this.transactions_api), 2000);
       });
+  }
+
+  public getActiveModel() {
+    setInterval(() =>
+      this.httpClient
+        .get(this.model_api)
+        .subscribe((res: any) => {
+          this.selectedModel = (res.name ? res : this.defaultSelectedModel);
+        }),
+      1000);
   }
 
   public showGraph(): boolean {
@@ -121,7 +143,7 @@ export class AppComponent implements OnInit {
     m.bindPopup("<b>" + randomLocation.name + "</b>").openPopup();
     this.llLayers.push(m);
 
-    this.save(this.api, transaction);
+    this.save(this.transactions_api, transaction);
   }
 
   public getDateTime(dateTime: any) {
@@ -134,7 +156,7 @@ export class AppComponent implements OnInit {
     this.httpClient
       .post(apiEndpoint, data)
       .subscribe(res => {
-        setTimeout(() => this.getTransactions(this.api), 2000);
+        setTimeout(() => this.getTransactions(this.transactions_api), 2000);
       });
   }
 

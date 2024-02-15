@@ -35,6 +35,12 @@ export interface Location {
   lon: number;
 }
 
+export interface SelectedModel {
+    name: string;
+    version: string;
+    current_stage: string;
+}
+
 export enum CardType {
   CREDIT_CARD = "CREDIT_CARD",
   DEBIT_CARD = "DEBIT_CARD"
